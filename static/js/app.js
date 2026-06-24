@@ -1338,3 +1338,65 @@ function handleAtsFileUpload(event) {
     };
     reader.readAsText(file);
 }
+
+// Preset configurations for the Resume template gallery
+function applyTemplatePreset(presetName) {
+    const layoutSel = document.getElementById('res-theme-preset');
+    const fontSel = document.getElementById('res-font');
+    const colorSel = document.getElementById('res-color');
+    const spacingSel = document.getElementById('res-spacing');
+    
+    if (!layoutSel || !fontSel || !colorSel || !spacingSel) return;
+    
+    switch(presetName) {
+        case 'minimal-tech':
+            layoutSel.value = 'minimal';
+            fontSel.value = 'sans';
+            colorSel.value = '#0f172a';
+            spacingSel.value = 'compact';
+            break;
+        case 'executive-serif':
+            layoutSel.value = 'bold';
+            fontSel.value = 'serif';
+            colorSel.value = '#1e3a8a';
+            spacingSel.value = 'standard';
+            break;
+        case 'double-modern':
+            layoutSel.value = 'double';
+            fontSel.value = 'sans';
+            colorSel.value = '#065f46';
+            spacingSel.value = 'compact';
+            break;
+        case 'mono-dev':
+            layoutSel.value = 'minimal';
+            fontSel.value = 'mono';
+            colorSel.value = '#0f172a';
+            spacingSel.value = 'standard';
+            break;
+        case 'left-sidebar-accent':
+            layoutSel.value = 'sidebar';
+            fontSel.value = 'sans';
+            colorSel.value = '#7c2d12';
+            spacingSel.value = 'spacious';
+            break;
+        case 'bold-headline':
+            layoutSel.value = 'bold';
+            fontSel.value = 'grotesk';
+            colorSel.value = '#991b1b';
+            spacingSel.value = 'spacious';
+            break;
+    }
+    
+    // Highlight the active button in the template presets gallery
+    const buttons = document.querySelectorAll('.template-gallery-grid button');
+    buttons.forEach(btn => {
+        btn.classList.remove('active');
+        // Match the button based on the onclick attribute
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(presetName)) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Rerender the resume preview panel
+    renderResumePreview();
+}

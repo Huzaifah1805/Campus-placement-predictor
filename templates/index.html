@@ -653,6 +653,18 @@
                                     <i class="fa-solid fa-sliders"></i>
                                     <h2>Style Customizer</h2>
                                 </div>
+                                <div class="form-group" style="margin-bottom: 16px;">
+                                    <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; display: inline-block;">Choose a Resume Template Preset</label>
+                                    <div class="template-gallery-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                        <button type="button" class="btn btn-outline btn-sm active" style="font-size: 0.76rem;" onclick="applyTemplatePreset('minimal-tech')">Minimalist Tech</button>
+                                        <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.76rem;" onclick="applyTemplatePreset('executive-serif')">Executive Serif</button>
+                                        <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.76rem;" onclick="applyTemplatePreset('double-modern')">Double Column Modern</button>
+                                        <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.76rem;" onclick="applyTemplatePreset('mono-dev')">Developer Mono</button>
+                                        <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.76rem;" onclick="applyTemplatePreset('left-sidebar-accent')">Sidebar Left Accent</button>
+                                        <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.76rem;" onclick="applyTemplatePreset('bold-headline')">Bold Headline</button>
+                                    </div>
+                                </div>
+                                <div class="form-divider" style="margin-top: 10px; margin-bottom: 10px;">Manual Style Adjustment</div>
                                 <div class="form-grid" style="row-gap: 12px;">
                                     <div class="form-group">
                                         <label for="res-theme-preset">Layout Template</label>

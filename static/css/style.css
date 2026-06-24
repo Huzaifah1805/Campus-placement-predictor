@@ -1757,3 +1757,11 @@ select.input-field-compact {
     #print-resume-container h2 { color: #555 !important; }
     #print-resume-container .section-title { border-bottom-color: #333 !important; }
 }
+
+/* Template gallery active preset selector styles */
+.template-gallery-grid button.active {
+    background: linear-gradient(135deg, var(--primary), var(--secondary)) !important;
+    color: #fff !important;
+    border-color: transparent !important;
+    box-shadow: 0 4px 10px var(--primary-glow);
+}
