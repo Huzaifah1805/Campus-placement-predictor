@@ -286,13 +286,35 @@ def match_companies(cgpa, coding_score, dsa_score, webdev_score, comm_score, pro
     """Matches student profile against company requirements and returns ranked list."""
     matched = []
     
+    def calculate_dim_fit(student_val, min_val, max_val):
+        if min_val <= 0:
+            return 100.0
+        if student_val >= min_val:
+            # Met or exceeded requirements: scale smoothly from 80% to 100%
+            if max_val == min_val:
+                return 100.0
+            return 80.0 + 20.0 * (student_val - min_val) / (max_val - min_val)
+        else:
+            # Below requirements: scale down from 80%
+            return 80.0 * (student_val / min_val)
+            
+    # Define tier hierarchy ranks for priority matching
+    TIER_RANKS = {
+        "Dream": 5,
+        "Tier-1 Product": 4,
+        "Specialist": 4,
+        "Mid-Tier Product": 3,
+        "Service MNC": 2,
+        "Entry Level": 1
+    }
+            
     for company in COMPANY_DATABASE:
-        # Calculate fit score (0-100) for each requirement dimension
-        cgpa_fit = min(100, (cgpa / company['min_cgpa']) * 100) if company['min_cgpa'] > 0 else 100
-        coding_fit = min(100, (coding_score / company['min_coding']) * 100) if company['min_coding'] > 0 else 100
-        dsa_fit = min(100, (dsa_score / company['min_dsa']) * 100) if company['min_dsa'] > 0 else 100
-        webdev_fit = min(100, (webdev_score / company['min_webdev']) * 100) if company['min_webdev'] > 0 else 100
-        comm_fit = min(100, (comm_score / company['min_comm']) * 100) if company['min_comm'] > 0 else 100
+        # Calculate granular fit scores (0-100) for each dimension
+        cgpa_fit = calculate_dim_fit(cgpa, company['min_cgpa'], 10.0)
+        coding_fit = calculate_dim_fit(coding_score, company['min_coding'], 100.0)
+        dsa_fit = calculate_dim_fit(dsa_score, company['min_dsa'], 100.0)
+        webdev_fit = calculate_dim_fit(webdev_score, company['min_webdev'], 100.0)
+        comm_fit = calculate_dim_fit(comm_score, company['min_comm'], 100.0)
         
         # Weighted overall fit
         overall_fit = (cgpa_fit * 0.20 + coding_fit * 0.25 + dsa_fit * 0.25 + webdev_fit * 0.15 + comm_fit * 0.15)
@@ -303,17 +325,20 @@ def match_companies(cgpa, coding_score, dsa_score, webdev_score, comm_score, pro
         meets_dsa = dsa_score >= company['min_dsa'] * 0.80
         
         # Classify match strength
-        if overall_fit >= 95 and meets_cgpa and meets_coding and meets_dsa:
+        if overall_fit >= 92 and meets_cgpa and meets_coding and meets_dsa:
             match_level = "Strong Match"
             match_class = "success"
         elif overall_fit >= 80 and meets_cgpa:
             match_level = "Good Fit"
             match_class = "warning"
-        elif overall_fit >= 65:
+        elif overall_fit >= 60:
             match_level = "Stretch Target"
             match_class = "info"
         else:
             continue  # Skip companies that are too far out of reach
+            
+        tier_rank = TIER_RANKS.get(company['tier'], 1)
+        composite_score = overall_fit * (0.5 + 0.1 * tier_rank)
         
         matched.append({
             'name': company['name'],
@@ -323,12 +348,13 @@ def match_companies(cgpa, coding_score, dsa_score, webdev_score, comm_score, pro
             'color': company['color'],
             'focus': company['focus'],
             'fit_score': round(overall_fit, 1),
+            'composite_score': composite_score,
             'match_level': match_level,
             'match_class': match_class
         })
     
-    # Sort by fit score descending
-    matched.sort(key=lambda x: x['fit_score'], reverse=True)
+    # Sort by composite score (tier importance * skill fit) descending
+    matched.sort(key=lambda x: x['composite_score'], reverse=True)
     
     return matched
 
