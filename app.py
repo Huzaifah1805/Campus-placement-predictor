@@ -117,6 +117,45 @@ def get_prediction_probability(features):
         print(f"Error in probability calculation: {err}")
         return 0.0
 
+def calculate_projected_salary(cgpa, internships, projects, backlogs, coding_score, dsa_score, comm_score, prob_placed):
+    """Calculates a personalized, continuous salary projection based on features."""
+    if prob_placed < 0.35:
+        return "Needs improvement to clear entry bar"
+        
+    # Scale boosts based on profile features
+    cgpa_boost = max(0.0, cgpa - 6.0) * 1.5       # Up to 6.0 LPA boost
+    internship_boost = min(5, internships) * 1.8  # Up to 9.0 LPA boost
+    project_boost = min(10, projects) * 0.8       # Up to 8.0 LPA boost
+    
+    # Technical skills contrib (max 12.0 LPA boost)
+    skill_contrib = (coding_score * 0.4 + dsa_score * 0.4 + comm_score * 0.2) / 100.0
+    skill_boost = skill_contrib * 12.0
+    
+    # Sum up factors and apply backlog penalty
+    total_package = 3.2 + cgpa_boost + internship_boost + project_boost + skill_boost
+    if backlogs > 0:
+        total_package -= min(5.0, 1.5 * backlogs)
+        
+    # Multiply by placement probability representing final likelihood/leverage
+    realized_package = total_package * prob_placed
+    
+    # Cap boundaries
+    realized_package = max(3.2, min(35.0, realized_package))
+    
+    # Generate range (+/- 15% of calculated package)
+    low_bound = round(realized_package * 0.85, 1)
+    high_bound = round(realized_package * 1.15, 1)
+    
+    # Determine the category tier name
+    if realized_package >= 14.0:
+        tier = "Product / Tier-1 Role"
+    elif realized_package >= 6.5:
+        tier = "Specialized / System Engineer"
+    else:
+        tier = "Associate Software Engineer / Service Role"
+        
+    return f"{low_bound:.1f} - {high_bound:.1f} LPA ({tier})"
+
 @app.route('/api/predict', methods=['POST'])
 def predict():
     """
@@ -220,16 +259,9 @@ def predict():
         mentor_data = get_feedback_and_recommendations(parsed_profile)
         
         # 4. Salary Projection estimation
-        # Realistic brackets based on probability and coding skill
-        base_salary = 3.6 # Lakhs per annum (LPA) - typical service company package
-        if prob_placed > 0.85 and coding_score >= 80 and dsa_score >= 80:
-            salary_range = "12.0 - 24.0 LPA (Product / Tier-1 Role)"
-        elif prob_placed > 0.70 and coding_score >= 65:
-            salary_range = "6.5 - 11.0 LPA (System Engineer / Specialized Role)"
-        elif prob_placed > 0.40:
-            salary_range = "3.6 - 5.0 LPA (Associate Software Engineer / Service Role)"
-        else:
-            salary_range = "Needs improvement to clear entry bar"
+        salary_range = calculate_projected_salary(
+            cgpa, internships, projects, backlogs, coding_score, dsa_score, comm_score, prob_placed
+        )
         # Save prediction run details to database history log
         try:
             conn = sqlite3.connect(DB_PATH)
