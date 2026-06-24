@@ -107,7 +107,8 @@ def get_model_info():
 def get_prediction_probability(features):
     """Encapsulates scaling and prediction, applying defensive percentage checks."""
     try:
-        scaled = scaler.transform([features])
+        df = pd.DataFrame([features], columns=feature_names)
+        scaled = scaler.transform(df)
         prob = model.predict_proba(scaled)[0][1]
         # Defensively normalize if the model or other logic outputs a percentage (0-100) instead of probability (0-1)
         if prob > 1.0:
@@ -523,6 +524,24 @@ def get_dashboard_stats():
         avg_probability = float(row[1]) if row[1] is not None else 0.0
         avg_cgpa = float(row[2]) if row[2] is not None else 0.0
         
+        # Calculate real average projected salary from database
+        cursor.execute("SELECT salary_range FROM predictions")
+        salaries = cursor.fetchall()
+        total_sal = 0.0
+        count_sal = 0
+        for s_row in salaries:
+            val = s_row[0]
+            if val and "LPA" in val:
+                try:
+                    # extract part before "LPA" e.g., "10.4 - 14.1"
+                    range_part = val.split("LPA")[0].strip()
+                    parts = [float(x.strip()) for x in range_part.split("-")]
+                    total_sal += sum(parts) / len(parts)
+                    count_sal += 1
+                except Exception:
+                    pass
+        avg_pred_salary = total_sal / count_sal if count_sal > 0 else 0.0
+        
         conn.close()
         
         # Training dataset baseline statistics
@@ -545,6 +564,7 @@ def get_dashboard_stats():
             'diagnoses_run': diagnoses_count,
             'average_run_probability': avg_probability,
             'average_run_cgpa': avg_cgpa,
+            'average_projected_salary': avg_pred_salary,
             'baseline': {
                 'total_records': dataset_records,
                 'placed_ratio': dataset_placed_ratio,
