@@ -5,6 +5,7 @@ import os
 import sqlite3
 import pandas as pd
 from recommender import get_feedback_and_recommendations
+from ats_processor import analyze_ats_score
 
 app = Flask(__name__, 
             static_folder='static',
@@ -331,6 +332,29 @@ def get_dashboard_stats():
                 'placed_ratio': dataset_placed_ratio,
                 'avg_cgpa': dataset_avg_cgpa
             }
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/ats-check', methods=['POST'])
+def ats_check():
+    """Analyzes resume text against a job description for ATS compatibility."""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'status': 'error', 'message': 'Missing request payload'}), 400
+            
+        resume_text = data.get('resume_text', '')
+        job_desc = data.get('job_description', '')
+        
+        analysis = analyze_ats_score(resume_text, job_desc)
+        
+        return jsonify({
+            'status': 'success',
+            'score': analysis['score'],
+            'matched_keywords': analysis['matched'],
+            'missing_keywords': analysis['missing'],
+            'recommendations': analysis['recommendations']
         })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500

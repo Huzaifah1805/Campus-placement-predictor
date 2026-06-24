@@ -69,6 +69,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fetch dynamic database stats & logs on startup
     fetchDashboardStats();
     fetchPredictionHistory();
+    
+    // Initialize Resume Maker & ATS Checker
+    initResumeMaker();
 });
 
 // ==========================================
@@ -167,6 +170,14 @@ function updateHeaderTitle(sectionId) {
         case 'mock-test':
             titleEl.textContent = 'Quick Skill Assessment Quiz';
             subtitleEl.textContent = 'Assess your technical skills instantly to pre-fill your profile.';
+            break;
+        case 'resume-maker':
+            titleEl.textContent = 'Custom Resume Builder';
+            subtitleEl.textContent = 'Build, style, and download a professional ATS-optimized resume.';
+            break;
+        case 'ats-checker':
+            titleEl.textContent = 'ATS Resume Score Checker';
+            subtitleEl.textContent = 'Scan your resume against a job description to calculate keyword match scores.';
             break;
     }
 }
@@ -863,4 +874,467 @@ async function fetchPredictionHistory() {
     } catch (e) {
         console.error('Failed to fetch prediction history:', e);
     }
+}
+
+// ==========================================
+// RESUME BUILDER LOGIC
+// ==========================================
+function initResumeMaker() {
+    const resumeForm = document.getElementById('resume-form');
+    if (!resumeForm) return;
+
+    // Attach input listeners to all static inputs
+    const inputs = resumeForm.querySelectorAll('input, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('input', renderResumePreview);
+    });
+
+    // Initial render
+    renderResumePreview();
+}
+
+function addExperienceField() {
+    const container = document.getElementById('experience-fields-container');
+    if (!container) return;
+
+    const div = document.createElement('div');
+    div.className = 'cloneable-experience margin-bottom-sm';
+    div.innerHTML = `
+        <button type="button" class="btn btn-outline btn-sm" style="position:absolute; right:10px; top:10px; padding:4px 8px; border-color:var(--danger); color:var(--danger);" onclick="this.parentElement.remove(); renderResumePreview();">
+            <i class="fa-solid fa-trash"></i>
+        </button>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Company Name</label>
+                <input type="text" class="input-field exp-company" placeholder="e.g. Google">
+            </div>
+            <div class="form-group">
+                <label>Role / Designation</label>
+                <input type="text" class="input-field exp-role" placeholder="e.g. Software Engineer">
+            </div>
+            <div class="form-group">
+                <label>Date Range (e.g. June 2025 - Aug 2025)</label>
+                <input type="text" class="input-field exp-dates" placeholder="e.g. June 2025 - Present">
+            </div>
+        </div>
+        <div class="form-group margin-top-sm">
+            <label>Responsibilities & Achievements</label>
+            <textarea class="input-field exp-desc" style="height: 60px;" placeholder="Describe your achievements..."></textarea>
+        </div>
+    `;
+    container.appendChild(div);
+
+    // Bind inputs to renderer
+    div.querySelectorAll('input, textarea').forEach(el => {
+        el.addEventListener('input', renderResumePreview);
+    });
+    renderResumePreview();
+}
+
+function addProjectField() {
+    const container = document.getElementById('project-fields-container');
+    if (!container) return;
+
+    const div = document.createElement('div');
+    div.className = 'cloneable-project margin-bottom-sm';
+    div.innerHTML = `
+        <button type="button" class="btn btn-outline btn-sm" style="position:absolute; right:10px; top:10px; padding:4px 8px; border-color:var(--danger); color:var(--danger);" onclick="this.parentElement.remove(); renderResumePreview();">
+            <i class="fa-solid fa-trash"></i>
+        </button>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Project Title</label>
+                <input type="text" class="input-field proj-title" placeholder="e.g. E-Commerce Portal">
+            </div>
+            <div class="form-group">
+                <label>Tech Stack Used</label>
+                <input type="text" class="input-field proj-stack" placeholder="e.g. MERN Stack">
+            </div>
+            <div class="form-group">
+                <label>Project Link (Optional)</label>
+                <input type="text" class="input-field proj-link" placeholder="e.g. github.com/username/project">
+            </div>
+        </div>
+        <div class="form-group margin-top-sm">
+            <label>Project Description</label>
+            <textarea class="input-field proj-desc" style="height: 60px;" placeholder="Describe what you built..."></textarea>
+        </div>
+    `;
+    container.appendChild(div);
+
+    // Bind inputs to renderer
+    div.querySelectorAll('input, textarea').forEach(el => {
+        el.addEventListener('input', renderResumePreview);
+    });
+    renderResumePreview();
+}
+
+function renderResumePreview() {
+    const previewContainer = document.getElementById('resume-rendered-sheet');
+    if (!previewContainer) return;
+
+    // Get Form values
+    const name = document.getElementById('res-name').value || 'Your Name';
+    const title = document.getElementById('res-title').value || 'Target Job Title';
+    const email = document.getElementById('res-email').value || 'email@example.com';
+    const phone = document.getElementById('res-phone').value || '+1-123-456-7890';
+    const github = document.getElementById('res-github').value || '';
+    const linkedin = document.getElementById('res-linkedin').value || '';
+    const summary = document.getElementById('res-summary').value || '';
+
+    const school = document.getElementById('res-school').value || '';
+    const degree = document.getElementById('res-degree').value || '';
+    const grad = document.getElementById('res-grad').value || '';
+    const cgpa = document.getElementById('res-cgpa').value || '';
+    const skillsList = document.getElementById('res-skills-list').value || '';
+
+    // Style selections
+    const preset = document.getElementById('res-theme-preset').value;
+    const font = document.getElementById('res-font').value;
+    const color = document.getElementById('res-color').value;
+    const spacing = document.getElementById('res-spacing').value;
+
+    // Compile dynamic experiences
+    let experienceHtml = '';
+    document.querySelectorAll('.cloneable-experience').forEach(el => {
+        const company = el.querySelector('.exp-company').value;
+        const role = el.querySelector('.exp-role').value;
+        const dates = el.querySelector('.exp-dates').value;
+        const desc = el.querySelector('.exp-desc').value;
+
+        if (company || role) {
+            experienceHtml += `
+                <div style="margin-bottom: 12px; text-align: left;">
+                    <div class="resume-item-header" style="display: flex; justify-content: space-between; align-items: baseline;">
+                        <span style="font-weight: 700; color: #1e293b; font-size: 0.85rem;">${company}</span>
+                        <span style="font-size: 0.75rem; color: #64748b;">${dates}</span>
+                    </div>
+                    <div class="resume-item-subheader" style="display: flex; justify-content: space-between; font-style: italic; color: #475569; font-size: 0.78rem; margin-bottom: 2px;">
+                        <span>${role}</span>
+                    </div>
+                    <p class="resume-item-desc" style="font-size: 0.78rem; color: #475569; line-height: 1.35; margin-bottom: 8px;">${desc.replace(/\n/g, '<br>')}</p>
+                </div>
+            `;
+        }
+    });
+
+    // Compile dynamic projects
+    let projectsHtml = '';
+    document.querySelectorAll('.cloneable-project').forEach(el => {
+        const pTitle = el.querySelector('.proj-title').value;
+        const pStack = el.querySelector('.proj-stack').value;
+        const pLink = el.querySelector('.proj-link').value;
+        const pDesc = el.querySelector('.proj-desc').value;
+
+        if (pTitle) {
+            projectsHtml += `
+                <div style="margin-bottom: 12px; text-align: left;">
+                    <div class="resume-item-header" style="display: flex; justify-content: space-between; align-items: baseline;">
+                        <span style="font-weight: 700; color: #1e293b; font-size: 0.85rem;">${pTitle}</span>
+                        ${pLink ? `<span style="font-size: 0.75rem; color: ${color}; font-weight: 500;">${pLink}</span>` : ''}
+                    </div>
+                    <div class="resume-item-subheader" style="display: flex; justify-content: space-between; font-style: italic; color: #475569; font-size: 0.78rem; margin-bottom: 2px;">
+                        <span style="font-size: 0.78rem; color: #64748b;">Stack: ${pStack}</span>
+                    </div>
+                    <p class="resume-item-desc" style="font-size: 0.78rem; color: #475569; line-height: 1.35; margin-bottom: 8px;">${pDesc.replace(/\n/g, '<br>')}</p>
+                </div>
+            `;
+        }
+    });
+
+    // Compile skills tags
+    let skillsHtml = '';
+    if (skillsList) {
+        const skills = skillsList.split(',').map(s => s.trim()).filter(s => s.length > 0);
+        skillsHtml = skills.map(skill => 
+            `<span style="display: inline-block; background: #f1f5f9; color: #334155; padding: 4px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 600; margin-right: 6px; margin-bottom: 6px; border: 1px solid #e2e8f0;">${skill}</span>`
+        ).join('');
+    }
+
+    // Build contacts row HTML
+    let contactRowHtml = `
+        <span><i class="fa-solid fa-envelope"></i> ${email}</span>
+        <span><i class="fa-solid fa-phone"></i> ${phone}</span>
+    `;
+    if (github) contactRowHtml += `<span><i class="fa-brands fa-github"></i> ${github}</span>`;
+    if (linkedin) contactRowHtml += `<span><i class="fa-brands fa-linkedin"></i> ${linkedin}</span>`;
+
+    // Apply layout wrapper classes
+    const sheetContainer = previewContainer.parentElement;
+    sheetContainer.className = `resume-sheet-container spacing-${spacing}`;
+
+    // Compile layouts templates
+    let contentHtml = '';
+
+    if (preset === 'minimal' || preset === 'bold') {
+        const alignmentClass = preset === 'bold' ? 'layout-bold' : '';
+        contentHtml = `
+            <div class="resume-rendered-body font-${font} ${alignmentClass}">
+                <div class="header-block" style="border-bottom: 2px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 12px;">
+                    <h1 style="color: ${color}; margin-bottom: 2px; font-size: 1.6rem; font-weight: 800;">${name}</h1>
+                    <h2 style="font-size: 1.0rem; font-weight: 600; color: #475569; margin-bottom: 6px;">${title}</h2>
+                    <div class="contact-row" style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.78rem; color: #64748b;">${contactRowHtml}</div>
+                </div>
+                
+                ${summary ? `
+                    <div class="section-title" style="color: ${color}; border-bottom-color: ${color}40;">Summary</div>
+                    <p class="resume-item-desc" style="text-align: left;">${summary}</p>
+                ` : ''}
+
+                ${degree || school ? `
+                    <div class="section-title" style="color: ${color}; border-bottom-color: ${color}40;">Education</div>
+                    <div style="margin-bottom: 10px; text-align: left;">
+                        <div class="resume-item-header" style="display: flex; justify-content: space-between; align-items: baseline;">
+                            <span style="font-weight: 700; color: #1e293b; font-size: 0.85rem;">${school}</span>
+                            <span style="font-size: 0.75rem; color: #64748b;">Graduation: ${grad}</span>
+                        </div>
+                        <div class="resume-item-subheader" style="display: flex; justify-content: space-between; font-style: italic; color: #475569; font-size: 0.78rem; margin-bottom: 2px;">
+                            <span>${degree}</span>
+                            <span style="font-weight: 600; color: ${color};">${cgpa}</span>
+                        </div>
+                    </div>
+                ` : ''}
+
+                ${experienceHtml ? `
+                    <div class="section-title" style="color: ${color}; border-bottom-color: ${color}40;">Experience</div>
+                    <div>${experienceHtml}</div>
+                ` : ''}
+
+                ${projectsHtml ? `
+                    <div class="section-title" style="color: ${color}; border-bottom-color: ${color}40;">Projects</div>
+                    <div>${projectsHtml}</div>
+                ` : ''}
+
+                ${skillsHtml ? `
+                    <div class="section-title" style="color: ${color}; border-bottom-color: ${color}40;">Skills</div>
+                    <div style="margin-top: 8px; display: flex; flex-wrap: wrap; justify-content: ${preset === 'bold' ? 'center' : 'flex-start'};">${skillsHtml}</div>
+                ` : ''}
+            </div>
+        `;
+    } else if (preset === 'double' || preset === 'sidebar') {
+        const leftSidebar = preset === 'sidebar';
+        
+        const mainContent = `
+            <div style="text-align: left;">
+                ${summary ? `
+                    <div class="section-title" style="color: ${color}; border-bottom-color: ${color}40;">Summary</div>
+                    <p class="resume-item-desc" style="margin-bottom: 12px;">${summary}</p>
+                ` : ''}
+                
+                ${experienceHtml ? `
+                    <div class="section-title" style="color: ${color}; border-bottom-color: ${color}40;">Experience</div>
+                    <div>${experienceHtml}</div>
+                ` : ''}
+
+                ${projectsHtml ? `
+                    <div class="section-title" style="color: ${color}; border-bottom-color: ${color}40;">Projects</div>
+                    <div>${projectsHtml}</div>
+                ` : ''}
+            </div>
+        `;
+
+        const sidebarContent = `
+            <div style="text-align: left;">
+                ${degree || school ? `
+                    <div class="section-title" style="color: ${color}; border-bottom-color: ${color}40;">Education</div>
+                    <div style="margin-bottom: 12px; font-size: 0.78rem;">
+                        <p style="font-weight: 700; margin-bottom: 2px; color: #1e293b;">${school}</p>
+                        <p style="margin-bottom: 2px;">${degree}</p>
+                        <p style="color: #64748b; margin-bottom: 2px;">Grad: ${grad}</p>
+                        <p style="font-weight: 600; color: ${color};">${cgpa}</p>
+                    </div>
+                ` : ''}
+
+                ${skillsHtml ? `
+                    <div class="section-title" style="color: ${color}; border-bottom-color: ${color}40;">Skills</div>
+                    <div style="display: flex; flex-wrap: wrap; margin-top: 8px;">${skillsHtml}</div>
+                ` : ''}
+            </div>
+        `;
+
+        contentHtml = `
+            <div class="resume-rendered-body font-${font} layout-${preset}">
+                <div class="header-block" style="border-bottom: 2px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 12px; text-align: left;">
+                    <h1 style="color: ${color}; margin-bottom: 2px; font-size: 1.6rem; font-weight: 800;">${name}</h1>
+                    <h2 style="font-size: 1.0rem; font-weight: 600; color: #475569; margin-bottom: 6px;">${title}</h2>
+                    <div class="contact-row" style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.78rem; color: #64748b;">${contactRowHtml}</div>
+                </div>
+                ${leftSidebar ? sidebarContent + mainContent : mainContent + sidebarContent}
+            </div>
+        `;
+    }
+
+    previewContainer.innerHTML = contentHtml;
+}
+
+function updateResumeTheme() {
+    renderResumePreview();
+}
+
+function triggerResumePrint() {
+    renderResumePreview();
+    const resumeHtml = document.getElementById('resume-rendered-sheet').innerHTML;
+    const spacing = document.getElementById('res-spacing').value;
+
+    const printContainer = document.createElement('div');
+    printContainer.id = 'print-resume-container';
+    printContainer.className = `resume-sheet-container spacing-${spacing}`;
+    printContainer.innerHTML = resumeHtml;
+
+    document.body.appendChild(printContainer);
+    window.print();
+}
+
+window.onafterprint = () => {
+    const container = document.getElementById('print-resume-container');
+    if (container) {
+        container.remove();
+    }
+};
+
+// ==========================================
+// ATS SCORE CHECKER LOGIC
+// ==========================================
+async function runAtsAnalysis() {
+    const resumeText = document.getElementById('ats-resume-text').value.trim();
+    const jobDesc = document.getElementById('ats-job-desc').value.trim();
+
+    if (!resumeText || !jobDesc) {
+        showToast('Please paste both your resume text and the job description.', 'error');
+        return;
+    }
+
+    const runBtn = document.getElementById('btn-run-ats');
+    const btnText = document.getElementById('btn-ats-text');
+    const spinner = document.getElementById('btn-ats-spinner');
+
+    if (runBtn) runBtn.disabled = true;
+    if (btnText) btnText.textContent = 'Scanning Resume...';
+    if (spinner) spinner.classList.remove('hidden');
+
+    try {
+        const response = await fetch('/api/ats-check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ resume_text: resumeText, job_description: jobDesc })
+        });
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            showToast('ATS Scan complete!', 'success');
+            populateAtsResults(data);
+        } else {
+            showToast(data.message || 'ATS check failed.', 'error');
+        }
+    } catch (e) {
+        console.error('Error in ATS check:', e);
+        showToast('Connection error, ATS analysis failed.', 'error');
+    } finally {
+        if (runBtn) runBtn.disabled = false;
+        if (btnText) btnText.textContent = 'Analyze ATS Compatibility';
+        if (spinner) spinner.classList.add('hidden');
+    }
+}
+
+function populateAtsResults(data) {
+    const score = data.score;
+    const scoreTextEl = document.getElementById('display-ats-score');
+    if (scoreTextEl) {
+        animateNumber(0, score, 800, (v) => {
+            scoreTextEl.textContent = v + '%';
+        });
+    }
+
+    const circle = document.getElementById('ats-gauge-fill');
+    if (circle) {
+        const radius = circle.r.baseVal.value;
+        const circumference = radius * 2 * Math.PI;
+        circle.style.strokeDasharray = `${circumference} ${circumference}`;
+        const offset = circumference - (score / 100) * circumference;
+        circle.style.strokeDashoffset = offset;
+    }
+
+    const labelEl = document.getElementById('ats-rating-label');
+    if (labelEl) {
+        if (score >= 80) {
+            labelEl.textContent = 'Excellent Match';
+            labelEl.style.color = 'var(--success)';
+        } else if (score >= 50) {
+            labelEl.textContent = 'Moderate Match';
+            labelEl.style.color = 'var(--warning)';
+        } else {
+            labelEl.textContent = 'Weak Match';
+            labelEl.style.color = 'var(--danger)';
+        }
+    }
+
+    const recFeed = document.getElementById('ats-rec-feed');
+    if (recFeed) {
+        recFeed.innerHTML = '';
+        data.recommendations.forEach(rec => {
+            const li = document.createElement('li');
+            li.className = 'recommendation-item';
+            
+            let icon = 'fa-solid fa-circle-exclamation warning';
+            if (rec.includes('Action Required')) icon = 'fa-solid fa-triangle-exclamation danger';
+            if (rec.includes('Excellent')) icon = 'fa-solid fa-circle-check success';
+
+            li.innerHTML = `
+                <i class="rec-icon ${icon}" style="font-size:1.1rem; margin-top:2px;"></i>
+                <div class="rec-info">
+                    <p style="font-size:0.82rem; color:var(--text-primary); font-weight:500; line-height:1.4;">${rec}</p>
+                </div>
+            `;
+            recFeed.appendChild(li);
+        });
+    }
+
+    const matchedContainer = document.getElementById('ats-matched-tags');
+    if (matchedContainer) {
+        matchedContainer.innerHTML = '';
+        if (data.matched_keywords && data.matched_keywords.length > 0) {
+            data.matched_keywords.forEach(kw => {
+                const span = document.createElement('span');
+                span.className = 'ats-tag matched';
+                span.textContent = kw;
+                matchedContainer.appendChild(span);
+            });
+        } else {
+            matchedContainer.innerHTML = '<span style="font-size:0.78rem; color:var(--text-muted);">No matching technical keywords found.</span>';
+        }
+    }
+
+    const missingContainer = document.getElementById('ats-missing-tags');
+    if (missingContainer) {
+        missingContainer.innerHTML = '';
+        if (data.missing_keywords && data.missing_keywords.length > 0) {
+            data.missing_keywords.forEach(kw => {
+                const span = document.createElement('span');
+                span.className = 'ats-tag missing';
+                span.textContent = kw;
+                missingContainer.appendChild(span);
+            });
+        } else {
+            missingContainer.innerHTML = '<span style="font-size:0.78rem; color:var(--text-muted);">No missing keywords. Great job!</span>';
+        }
+    }
+}
+
+function handleAtsFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const text = e.target.result;
+        const textarea = document.getElementById('ats-resume-text');
+        if (textarea) {
+            textarea.value = text;
+            showToast('TXT Resume file loaded successfully!', 'success');
+        }
+    };
+    reader.onerror = () => {
+        showToast('Failed to read text file.', 'error');
+    };
+    reader.readAsText(file);
 }

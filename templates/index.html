@@ -45,6 +45,14 @@
                     <i class="fa-solid fa-laptop-code"></i>
                     <span>Mock Skill Quiz</span>
                 </a>
+                <a href="#" class="nav-item" data-section="resume-maker" id="nav-resume-maker">
+                    <i class="fa-solid fa-file-invoice"></i>
+                    <span>Resume Maker</span>
+                </a>
+                <a href="#" class="nav-item" data-section="ats-checker" id="nav-ats-checker">
+                    <i class="fa-solid fa-magnifying-glass-chart"></i>
+                    <span>ATS Score Checker</span>
+                </a>
             </nav>
             <div class="sidebar-footer">
                 <div class="system-status">
@@ -496,7 +504,309 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- SECTION 6: RESUME MAKER -->
+                <section id="section-resume-maker" class="screen-section">
+                    <div class="grid-2-col">
+                        <!-- Left: Input Form Panel -->
+                        <div class="glass-card">
+                            <div class="card-header">
+                                <i class="fa-solid fa-file-invoice"></i>
+                                <h2>Resume Builder Form</h2>
+                            </div>
+                            <form id="resume-form" class="flex-column-gap">
+                                <!-- Personal Details -->
+                                <div class="form-section-group">
+                                    <div class="form-divider">Contact Details</div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label for="res-name">Full Name</label>
+                                            <input type="text" id="res-name" class="input-field" placeholder="Alex Carter" value="Alex Carter">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="res-title">Target Role Title</label>
+                                            <input type="text" id="res-title" class="input-field" placeholder="Software Engineer" value="Software Engineer">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="res-email">Email Address</label>
+                                            <input type="email" id="res-email" class="input-field" placeholder="alex@gmail.com" value="alex@gmail.com">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="res-phone">Phone Number</label>
+                                            <input type="text" id="res-phone" class="input-field" placeholder="+1-123-456-7890" value="+1-123-456-7890">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="res-github">GitHub Profile URL</label>
+                                            <input type="text" id="res-github" class="input-field" placeholder="github.com/alex" value="github.com/alex">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="res-linkedin">LinkedIn URL</label>
+                                            <input type="text" id="res-linkedin" class="input-field" placeholder="linkedin.com/in/alex" value="linkedin.com/in/alex">
+                                        </div>
+                                    </div>
+                                    <div class="form-group margin-top-sm">
+                                        <label for="res-summary">Professional Summary</label>
+                                        <textarea id="res-summary" class="input-field" style="height: 80px;" placeholder="Motivated software engineer student with strong foundations in DSA and web development...">Passionate Software Engineer with hands-on experience in building scalable web applications. Strong analytical thinker, proficient in Data Structures, Algorithms, and full-stack development tools.</textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Education Details -->
+                                <div class="form-section-group">
+                                    <div class="form-divider">Education</div>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label for="res-school">College/University</label>
+                                            <input type="text" id="res-school" class="input-field" value="State Engineering University">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="res-degree">Degree & Major</label>
+                                            <input type="text" id="res-degree" class="input-field" value="B.Tech in Computer Science">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="res-grad">Graduation Year</label>
+                                            <input type="text" id="res-grad" class="input-field" value="2027">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="res-cgpa">CGPA / GPA</label>
+                                            <input type="text" id="res-cgpa" class="input-field" value="8.4 CGPA">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Dynamic Experience Section -->
+                                <div class="form-section-group">
+                                    <div class="form-divider">Work Experience</div>
+                                    <div id="experience-fields-container">
+                                        <div class="cloneable-experience margin-bottom-sm">
+                                            <div class="form-grid">
+                                                <div class="form-group">
+                                                    <label>Company Name</label>
+                                                    <input type="text" class="input-field exp-company" value="ByteCode Solutions">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Role / Designation</label>
+                                                    <input type="text" class="input-field exp-role" value="Software Intern">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Date Range (e.g. June 2025 - Present)</label>
+                                                    <input type="text" class="input-field exp-dates" value="June 2025 - Aug 2025">
+                                                </div>
+                                            </div>
+                                            <div class="form-group margin-top-sm">
+                                                <label>Responsibilities & Achievements</label>
+                                                <textarea class="input-field exp-desc" style="height: 60px;">Collaborated in building microservices using Node.js and REST APIs. Optimised database query indexes, boosting search speed by 15%.</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-outline btn-sm margin-top-sm" onclick="addExperienceField()">
+                                        <i class="fa-solid fa-plus"></i> Add Work Experience
+                                    </button>
+                                </div>
+
+                                <!-- Dynamic Projects Section -->
+                                <div class="form-section-group">
+                                    <div class="form-divider">Academic & Personal Projects</div>
+                                    <div id="project-fields-container">
+                                        <div class="cloneable-project margin-bottom-sm">
+                                            <div class="form-grid">
+                                                <div class="form-group">
+                                                    <label>Project Title</label>
+                                                    <input type="text" class="input-field proj-title" value="Collaborative Code Editor">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Tech Stack Used</label>
+                                                    <input type="text" class="input-field proj-stack" value="React, Node.js, WebSockets">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Project Link (Optional)</label>
+                                                    <input type="text" class="input-field proj-link" value="github.com/alex/code-share">
+                                                </div>
+                                            </div>
+                                            <div class="form-group margin-top-sm">
+                                                <label>Project Description</label>
+                                                <textarea class="input-field proj-desc" style="height: 60px;">Engineered a real-time multiplayer code IDE supporting syntax highlight and concurrent editing. Sandboxed compile engine via Docker containers.</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-outline btn-sm margin-top-sm" onclick="addProjectField()">
+                                        <i class="fa-solid fa-plus"></i> Add Project
+                                    </button>
+                                </div>
+
+                                <!-- Technical Skills -->
+                                <div class="form-section-group">
+                                    <div class="form-divider">Skills & Proficiencies</div>
+                                    <div class="form-group">
+                                        <label for="res-skills-list">Comma-Separated Skills</label>
+                                        <input type="text" id="res-skills-list" class="input-field" value="Python, Java, JavaScript, Data Structures, Algorithms, React, SQL, AWS, Git, System Design">
+                                        <span class="field-help">Write skills separated by commas (e.g. Python, SQL, REST APIs).</span>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Right: Live Customizable Preview Panel -->
+                        <div class="flex-column-gap">
+                            <!-- Customizer Controls -->
+                            <div class="glass-card">
+                                <div class="card-header">
+                                    <i class="fa-solid fa-sliders"></i>
+                                    <h2>Style Customizer</h2>
+                                </div>
+                                <div class="form-grid" style="row-gap: 12px;">
+                                    <div class="form-group">
+                                        <label for="res-theme-preset">Layout Template</label>
+                                        <select id="res-theme-preset" class="input-field-compact" onchange="updateResumeTheme()">
+                                            <option value="minimal">Minimalist Classic</option>
+                                            <option value="double">Modern Split Columns</option>
+                                            <option value="sidebar">Sidebar Left Accent</option>
+                                            <option value="bold">Bold Executive Header</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="res-font">Typography Pack</label>
+                                        <select id="res-font" class="input-field-compact" onchange="updateResumeTheme()">
+                                            <option value="sans">Clean Sans-Serif (Inter)</option>
+                                            <option value="serif">Classic Serif (Georgia)</option>
+                                            <option value="mono">Developer Monospace</option>
+                                            <option value="grotesk">Space Grotesk</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="res-color">Accent Color</label>
+                                        <select id="res-color" class="input-field-compact" onchange="updateResumeTheme()">
+                                            <option value="#0f172a">Default Charcoal</option>
+                                            <option value="#1e3a8a">Royal Indigo</option>
+                                            <option value="#065f46">Forest Teal</option>
+                                            <option value="#991b1b">Crimson Red</option>
+                                            <option value="#7c2d12">Warm Amber</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="res-spacing">Margin Spacing</label>
+                                        <select id="res-spacing" class="input-field-compact" onchange="updateResumeTheme()">
+                                            <option value="compact">Compact (Dense)</option>
+                                            <option value="standard" selected>Standard</option>
+                                            <option value="spacious">Spacious (Clean)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="margin-top-sm">
+                                    <button class="btn btn-primary btn-full btn-lg" onclick="triggerResumePrint()">
+                                        <i class="fa-solid fa-print"></i> Download PDF / Print Resume
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Resume Live Preview Frame -->
+                            <div class="resume-preview-wrapper glass-card" style="padding: 0; overflow: hidden;">
+                                <div class="preview-header-bar" style="padding: 10px 16px; border-bottom:1px solid var(--border-glass); background:rgba(255,255,255,0.02); display:flex; justify-content:space-between; align-items:center;">
+                                    <span style="font-size:0.75rem; color:var(--text-muted);"><i class="fa-solid fa-eye"></i> Real-time PDF Preview</span>
+                                    <span class="status-dot green"></span>
+                                </div>
+                                <div class="resume-sheet-container" style="background:#fff; width:100%; min-height:600px; padding:24px; color:#1e293b; overflow-y:auto;">
+                                    <!-- Embedded resume content mapped here -->
+                                    <div id="resume-rendered-sheet"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 7: ATS SCORE CHECKER -->
+                <section id="section-ats-checker" class="screen-section">
+                    <div class="grid-2-col">
+                        <!-- Left: Input Textareas -->
+                        <div class="flex-column-gap">
+                            <div class="glass-card">
+                                <div class="card-header">
+                                    <i class="fa-solid fa-file-text"></i>
+                                    <h2>Paste Resume & Job Details</h2>
+                                </div>
+                                <div class="booking-form-grid" style="gap: 20px;">
+                                    <div class="form-group">
+                                        <label for="ats-resume-text">Resume Text Content</label>
+                                        <textarea id="ats-resume-text" class="input-field" style="height: 180px;" placeholder="Copy and paste the plain text of your resume here..."></textarea>
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                                            <span class="field-help">Or upload a text file (.txt):</span>
+                                            <input type="file" id="ats-file-upload" accept=".txt" style="display:none;" onchange="handleAtsFileUpload(event)">
+                                            <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('ats-file-upload').click()">
+                                                <i class="fa-solid fa-file-upload"></i> Upload TXT
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ats-job-desc">Target Job Description</label>
+                                        <textarea id="ats-job-desc" class="input-field" style="height: 180px;" placeholder="Paste the job description or role requirements here..."></textarea>
+                                    </div>
+                                    <button class="btn btn-primary btn-lg btn-full" id="btn-run-ats" onclick="runAtsAnalysis()">
+                                        <span id="btn-ats-text">Analyze ATS Compatibility</span>
+                                        <span id="btn-ats-spinner" class="spinner hidden"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Diagnosis Stats & Recommendations -->
+                        <div class="flex-column-gap">
+                            <!-- Gauge & Recommendations -->
+                            <div class="glass-card text-center" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div class="probability-circle-container">
+                                    <svg class="progress-ring" width="180" height="180">
+                                        <circle class="progress-ring__circle-bg" stroke="rgba(255, 255, 255, 0.08)" stroke-width="12" fill="transparent" r="70" cx="90" cy="90"/>
+                                        <circle id="ats-gauge-fill" class="progress-ring__circle" stroke="url(#gradient-success)" stroke-width="12" stroke-linecap="round" fill="transparent" r="70" cx="90" cy="90"/>
+                                    </svg>
+                                    <div class="probability-percent" id="display-ats-score" style="font-size: 2.2rem;">0%</div>
+                                </div>
+                                <div class="probability-label">
+                                    <h3>ATS Match Rating</h3>
+                                    <p id="ats-rating-label">Pending analysis...</p>
+                                </div>
+                            </div>
+
+                            <!-- Detailed Optimisation Recommendations -->
+                            <div class="glass-card">
+                                <div class="card-header">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                    <h2>ATS Optimizer Feed</h2>
+                                </div>
+                                <ul class="recommendation-list" id="ats-rec-feed" style="margin-top: 0;">
+                                    <li style="color:var(--text-muted); font-size:0.88rem; text-align:center; padding: 20px 0;">Submit analysis to load recommendations.</li>
+                                </ul>
+                            </div>
+
+                            <!-- Keywords Diagnostic split -->
+                            <div class="glass-card">
+                                <div class="card-header">
+                                    <i class="fa-solid fa-list-check"></i>
+                                    <h2>Keyword Analysis</h2>
+                                </div>
+                                
+                                <div style="display:flex; flex-direction:column; gap:16px;">
+                                    <div>
+                                        <h4 style="font-size:0.85rem; color:var(--success); margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+                                            <i class="fa-solid fa-circle-check"></i> Matched Keywords
+                                        </h4>
+                                        <div id="ats-matched-tags" style="display:flex; flex-wrap:wrap; gap:8px;">
+                                            <span style="font-size:0.78rem; color:var(--text-muted);">None detected.</span>
+                                        </div>
+                                    </div>
+                                    <div style="border-top: 1px solid var(--border-glass); padding-top:16px;">
+                                        <h4 style="font-size:0.85rem; color:var(--danger); margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+                                            <i class="fa-solid fa-circle-xmark"></i> Missing Keywords (Recruiter Gaps)
+                                        </h4>
+                                        <div id="ats-missing-tags" style="display:flex; flex-wrap:wrap; gap:8px;">
+                                            <span style="font-size:0.78rem; color:var(--text-muted);">None detected.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
+        </main>
+    </div>
         </main>
     </div>
 

@@ -1539,3 +1539,221 @@ select.input-field-compact {
 .light-mode .history-table tbody tr:hover {
     background-color: rgba(0, 0, 0, 0.02);
 }
+
+/* ==========================================
+   RESUME MAKER & ATS STYLING
+   ========================================== */
+.form-section-group {
+    background-color: rgba(255, 255, 255, 0.01);
+    border: 1px solid var(--border-glass);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 24px;
+}
+
+.cloneable-experience, .cloneable-project {
+    background-color: rgba(255, 255, 255, 0.01);
+    border: 1px solid var(--border-glass);
+    border-radius: 8px;
+    padding: 14px;
+    margin-top: 12px;
+    position: relative;
+}
+
+/* ATS tags matched & missing */
+.ats-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+.ats-tag.matched {
+    background-color: var(--success-bg);
+    color: var(--success);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+.ats-tag.missing {
+    background-color: var(--danger-bg);
+    color: var(--danger);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Rendered Resume Sheets */
+.resume-rendered-body {
+    color: #334155;
+    line-height: 1.4;
+    font-size: 0.85rem;
+}
+.resume-rendered-body h1 {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+    margin-bottom: 2px;
+}
+.resume-rendered-body h2 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 12px;
+}
+.resume-rendered-body h3 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+.resume-rendered-body p {
+    margin-bottom: 4px;
+}
+.resume-rendered-body .section-title {
+    border-bottom: 1.5px solid #cbd5e1;
+    padding-bottom: 3px;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.resume-rendered-body .contact-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 0.78rem;
+    color: #64748b;
+    margin-bottom: 12px;
+}
+.resume-rendered-body .contact-row span i {
+    margin-right: 4px;
+}
+
+/* Timeline lists inside resume */
+.resume-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 2px;
+}
+.resume-item-subheader {
+    display: flex;
+    justify-content: space-between;
+    font-style: italic;
+    color: #475569;
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+}
+.resume-item-desc {
+    font-size: 0.78rem;
+    color: #475569;
+    line-height: 1.35;
+    margin-bottom: 10px;
+}
+
+/* Margin Densities */
+.resume-sheet-container.spacing-compact { padding: 18px; }
+.resume-sheet-container.spacing-compact .section-title { margin-top: 10px; margin-bottom: 5px; }
+.resume-sheet-container.spacing-compact .resume-item-desc { margin-bottom: 6px; }
+
+.resume-sheet-container.spacing-spacious { padding: 36px; }
+.resume-sheet-container.spacing-spacious .section-title { margin-top: 22px; margin-bottom: 12px; }
+.resume-sheet-container.spacing-spacious .resume-item-desc { margin-bottom: 14px; }
+
+/* Font Combinations */
+.resume-rendered-body.font-sans { font-family: 'Inter', sans-serif; }
+.resume-rendered-body.font-serif { font-family: 'Georgia', serif; }
+.resume-rendered-body.font-mono { font-family: 'Courier New', monospace; }
+.resume-rendered-body.font-grotesk { font-family: 'Space Grotesk', sans-serif; }
+
+/* Layout variations */
+/* Bold Header */
+.resume-rendered-body.layout-bold {
+    text-align: center;
+}
+.resume-rendered-body.layout-bold .contact-row {
+    justify-content: center;
+}
+.resume-rendered-body.layout-bold .section-title {
+    text-align: left;
+}
+.resume-rendered-body.layout-bold .resume-item-header,
+.resume-rendered-body.layout-bold .resume-item-subheader {
+    text-align: left;
+}
+
+/* Split Columns */
+.resume-rendered-body.layout-double {
+    display: grid;
+    grid-template-columns: 2.2fr 1.2fr;
+    column-gap: 24px;
+}
+.resume-rendered-body.layout-double .header-block {
+    grid-column: 1 / -1;
+    border-bottom: 2px solid #cbd5e1;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+}
+.resume-rendered-body.layout-double .section-title {
+    margin-top: 12px;
+}
+
+/* Sidebar Accent Layout */
+.resume-rendered-body.layout-sidebar {
+    display: grid;
+    grid-template-columns: 1.2fr 2.2fr;
+    column-gap: 24px;
+}
+.resume-rendered-body.layout-sidebar .header-block {
+    grid-column: 1 / -1;
+    border-bottom: 2px solid #cbd5e1;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+}
+.resume-rendered-body.layout-sidebar .section-title {
+    margin-top: 12px;
+}
+
+/* ==========================================
+   PRINT MEDIA STYLES
+   ========================================== */
+@media print {
+    body, html {
+        background: #fff !important;
+        color: #000 !important;
+        width: 100% !important;
+        height: auto !important;
+    }
+    
+    /* Hide layout chrome completely */
+    .app-container, .sidebar, .main-content, .header, .glass-card, .btn, .theme-toggle, .preview-header-bar, .toast {
+        display: none !important;
+    }
+    
+    body > * {
+        display: none !important;
+    }
+    
+    /* Display ONLY the print container */
+    #print-resume-container {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100% !important;
+        height: auto !important;
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+    }
+    
+    #print-resume-container .resume-rendered-body {
+        font-size: 10pt !important;
+        color: #000 !important;
+    }
+    #print-resume-container h1 { color: #000 !important; }
+    #print-resume-container h2 { color: #555 !important; }
+    #print-resume-container .section-title { border-bottom-color: #333 !important; }
+}
