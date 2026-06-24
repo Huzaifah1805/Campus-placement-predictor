@@ -309,7 +309,11 @@ async function handleBookingSubmit(e) {
 // ==========================================
 function populateReportData(data, inputPayload) {
     // 1. Placement Probability Gauge Animation
-    const probPercent = Math.round(data.placement_probability * 100);
+    let prob = data.placement_probability;
+    if (prob > 1.0) {
+        prob = prob / 100.0;
+    }
+    const probPercent = Math.round(prob * 100);
     const displayProbEl = document.getElementById('display-prob');
     if (displayProbEl) {
         animateNumber(0, probPercent, 800, (v) => {
@@ -353,13 +357,21 @@ function populateReportData(data, inputPayload) {
                 const item = document.createElement('div');
                 item.className = 'scenario-item';
                 
-                const percentPlaced = Math.round(sc.probability * 100);
-                const percentImprove = Math.round(sc.improvement * 100);
+                let scProb = sc.probability;
+                if (scProb > 1.0) {
+                    scProb = scProb / 100.0;
+                }
+                let scImprov = sc.improvement;
+                if (Math.abs(scImprov) > 1.0) {
+                    scImprov = scImprov / 100.0;
+                }
+                const percentPlaced = Math.round(scProb * 100);
+                const percentImprove = Math.round(scImprov * 100);
                 
                 item.innerHTML = `
                     <div class="scenario-header">
                         <span class="scenario-title">${sc.scenario}</span>
-                        <span class="scenario-impact">+${percentImprove}% Chance</span>
+                        <span class="scenario-impact">${percentImprove >= 0 ? '+' : ''}${percentImprove}% Chance</span>
                     </div>
                     <div class="scenario-bar-bg">
                         <div class="scenario-bar-fill" style="width: ${percentPlaced}%"></div>
@@ -825,12 +837,21 @@ async function fetchDashboardStats() {
             }
             
             if (pkgEl && data.baseline && data.baseline.placed_ratio) {
-                const avgLpa = (data.baseline.placed_ratio * 12.5).toFixed(1);
+                let ratio = data.baseline.placed_ratio;
+                if (ratio > 1.0) {
+                    ratio = ratio / 100.0;
+                }
+                const avgLpa = (ratio * 12.5).toFixed(1);
                 pkgEl.textContent = `${avgLpa} LPA`;
             }
             
             if (accEl) {
-                accEl.textContent = (data.baseline.placed_ratio * 100 || 89.6).toFixed(1) + '%';
+                let ratio = data.baseline ? data.baseline.placed_ratio : null;
+                if (ratio > 1.0) {
+                    ratio = ratio / 100.0;
+                }
+                const finalRatio = ratio !== null && ratio !== undefined ? ratio : 0.896;
+                accEl.textContent = (finalRatio * 100).toFixed(1) + '%';
             }
         }
     } catch (e) {
@@ -858,7 +879,11 @@ async function fetchPredictionHistory() {
                                    ' ' + dateObj.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
                 
                 const techAvg = Math.round((row.coding_score + row.dsa_score + row.webdev_score) / 3);
-                const probPercent = Math.round(row.probability * 100);
+                let prob = row.probability;
+                if (prob > 1.0) {
+                    prob = prob / 100.0;
+                }
+                const probPercent = Math.round(prob * 100);
                 
                 tr.innerHTML = `
                     <td style="padding: 12px 16px; font-size: 0.85rem; color: var(--text-muted);">${timeString}</td>

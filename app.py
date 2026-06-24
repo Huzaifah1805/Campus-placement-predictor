@@ -104,6 +104,19 @@ def get_model_info():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+def get_prediction_probability(features):
+    """Encapsulates scaling and prediction, applying defensive percentage checks."""
+    try:
+        scaled = scaler.transform([features])
+        prob = model.predict_proba(scaled)[0][1]
+        # Defensively normalize if the model or other logic outputs a percentage (0-100) instead of probability (0-1)
+        if prob > 1.0:
+            prob = prob / 100.0
+        return float(prob)
+    except Exception as err:
+        print(f"Error in probability calculation: {err}")
+        return 0.0
+
 @app.route('/api/predict', methods=['POST'])
 def predict():
     """
@@ -135,8 +148,7 @@ def predict():
         input_features = [cgpa, internships, projects, backlogs, coding_score, comm_score, dsa_score, webdev_score]
         
         # 1. Base Prediction
-        scaled_features = scaler.transform([input_features])
-        prob_placed = model.predict_proba(scaled_features)[0][1] # Probability of index 1 (Placed)
+        prob_placed = get_prediction_probability(input_features)
         
         # 2. What-If Scenarios (Counterfactuals)
         what_if_scenarios = []
@@ -144,11 +156,10 @@ def predict():
         # Scenario A: What if they clear all active backlogs? (Only if backlogs > 0)
         if backlogs > 0:
             sc_features = [cgpa, internships, projects, 0, coding_score, comm_score, dsa_score, webdev_score]
-            sc_scaled = scaler.transform([sc_features])
-            sc_prob = model.predict_proba(sc_scaled)[0][1]
+            sc_prob = get_prediction_probability(sc_features)
             what_if_scenarios.append({
                 'scenario': 'Clear all active backlogs',
-                'probability': float(sc_prob),
+                'probability': sc_prob,
                 'improvement': float(sc_prob - prob_placed)
             })
             
@@ -156,22 +167,20 @@ def predict():
         if cgpa < 9.0:
             new_cgpa = min(10.0, cgpa + 1.0)
             sc_features = [new_cgpa, internships, projects, backlogs, coding_score, comm_score, dsa_score, webdev_score]
-            sc_scaled = scaler.transform([sc_features])
-            sc_prob = model.predict_proba(sc_scaled)[0][1]
+            sc_prob = get_prediction_probability(sc_features)
             what_if_scenarios.append({
                 'scenario': f'Boost CGPA to {new_cgpa:.1f} (+1.0)',
-                'probability': float(sc_prob),
+                'probability': sc_prob,
                 'improvement': float(sc_prob - prob_placed)
             })
             
         # Scenario C: What if they add 1 more Internship? (Only if internships < 3)
         if internships < 3:
             sc_features = [cgpa, internships + 1, projects, backlogs, coding_score, comm_score, dsa_score, webdev_score]
-            sc_scaled = scaler.transform([sc_features])
-            sc_prob = model.predict_proba(sc_scaled)[0][1]
+            sc_prob = get_prediction_probability(sc_features)
             what_if_scenarios.append({
                 'scenario': 'Complete 1 new Internship',
-                'probability': float(sc_prob),
+                'probability': sc_prob,
                 'improvement': float(sc_prob - prob_placed)
             })
             
@@ -180,22 +189,20 @@ def predict():
             new_coding = max(coding_score, 85)
             new_dsa = max(dsa_score, 85)
             sc_features = [cgpa, internships, projects, backlogs, new_coding, comm_score, new_dsa, webdev_score]
-            sc_scaled = scaler.transform([sc_features])
-            sc_prob = model.predict_proba(sc_scaled)[0][1]
+            sc_prob = get_prediction_probability(sc_features)
             what_if_scenarios.append({
                 'scenario': 'Master DSA & Coding Skills (Target: 85+)',
-                'probability': float(sc_prob),
+                'probability': sc_prob,
                 'improvement': float(sc_prob - prob_placed)
             })
 
         # Scenario E: What if they add 1 project? (Only if projects < 4)
         if projects < 4:
             sc_features = [cgpa, internships, projects + 1, backlogs, coding_score, comm_score, dsa_score, webdev_score]
-            sc_scaled = scaler.transform([sc_features])
-            sc_prob = model.predict_proba(sc_scaled)[0][1]
+            sc_prob = get_prediction_probability(sc_features)
             what_if_scenarios.append({
                 'scenario': 'Build 1 new major project',
-                'probability': float(sc_prob),
+                'probability': sc_prob,
                 'improvement': float(sc_prob - prob_placed)
             })
             
