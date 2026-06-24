@@ -309,13 +309,14 @@ async function handleBookingSubmit(e) {
 // ==========================================
 function populateReportData(data, inputPayload) {
     // 1. Placement Probability Gauge Animation
-    let prob = data.placement_probability;
-    if (prob > 1.0) {
-        prob = prob / 100.0;
-    }
-    const probPercent = Math.round(prob * 100);
+    let rawProb = data.placement_probability;
+    // Normalize: API returns 0.0-1.0; if somehow >1 treat as already-percentage
+    const probDecimal = rawProb > 1.0 ? rawProb / 100.0 : rawProb;
+    const probPercent = Math.min(100, Math.max(0, Math.round(probDecimal * 100)));
     const displayProbEl = document.getElementById('display-prob');
     if (displayProbEl) {
+        // Always guarantee the final value is explicitly set
+        displayProbEl.textContent = probPercent + '%';
         animateNumber(0, probPercent, 800, (v) => {
             displayProbEl.textContent = v + '%';
         });
@@ -813,6 +814,9 @@ function animateNumber(start, end, duration, callback) {
         callback(value);
         if (progress < 1) {
             window.requestAnimationFrame(step);
+        } else {
+            // Guarantee exact final value is always rendered
+            callback(end);
         }
     };
     window.requestAnimationFrame(step);

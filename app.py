@@ -117,42 +117,75 @@ def get_prediction_probability(features):
         print(f"Error in probability calculation: {err}")
         return 0.0
 
-def calculate_projected_salary(cgpa, internships, projects, backlogs, coding_score, dsa_score, comm_score, prob_placed):
-    """Calculates a personalized, continuous salary projection based on features."""
-    if prob_placed < 0.35:
+def calculate_projected_salary(cgpa, internships, projects, backlogs, coding_score, dsa_score, comm_score, webdev_score, prob_placed):
+    """Calculates a personalized, continuous salary projection based on features.
+    
+    Uses a weighted composite scoring system with non-linear CGPA scaling
+    to ensure every input combination produces a unique projected range.
+    """
+    if prob_placed < 0.25:
         return "Needs improvement to clear entry bar"
         
-    # Scale boosts based on profile features
-    cgpa_boost = max(0.0, cgpa - 6.0) * 1.5       # Up to 6.0 LPA boost
-    internship_boost = min(5, internships) * 1.8  # Up to 9.0 LPA boost
-    project_boost = min(10, projects) * 0.8       # Up to 8.0 LPA boost
-    
-    # Technical skills contrib (max 12.0 LPA boost)
-    skill_contrib = (coding_score * 0.4 + dsa_score * 0.4 + comm_score * 0.2) / 100.0
-    skill_boost = skill_contrib * 12.0
-    
-    # Sum up factors and apply backlog penalty
-    total_package = 3.2 + cgpa_boost + internship_boost + project_boost + skill_boost
-    if backlogs > 0:
-        total_package -= min(5.0, 1.5 * backlogs)
-        
-    # Multiply by placement probability representing final likelihood/leverage
-    realized_package = total_package * prob_placed
-    
-    # Cap boundaries
-    realized_package = max(3.2, min(35.0, realized_package))
-    
-    # Generate range (+/- 15% of calculated package)
-    low_bound = round(realized_package * 0.85, 1)
-    high_bound = round(realized_package * 1.15, 1)
-    
-    # Determine the category tier name
-    if realized_package >= 14.0:
-        tier = "Product / Tier-1 Role"
-    elif realized_package >= 6.5:
-        tier = "Specialized / System Engineer"
+    # --- 1. CGPA Component (non-linear, steep curve above 8.0) ---
+    # Maps 5.0-10.0 CGPA to 0-18 LPA contribution
+    if cgpa >= 9.0:
+        cgpa_score = 14.0 + (cgpa - 9.0) * 4.0     # 9.0→14, 9.5→16, 10.0→18
+    elif cgpa >= 8.0:
+        cgpa_score = 8.0 + (cgpa - 8.0) * 6.0       # 8.0→8, 8.5→11, 9.0→14
+    elif cgpa >= 7.0:
+        cgpa_score = 4.0 + (cgpa - 7.0) * 4.0       # 7.0→4, 7.5→6, 8.0→8
+    elif cgpa >= 6.0:
+        cgpa_score = 1.5 + (cgpa - 6.0) * 2.5       # 6.0→1.5, 6.5→2.75, 7.0→4
     else:
-        tier = "Associate Software Engineer / Service Role"
+        cgpa_score = max(0.0, cgpa - 5.0) * 1.5      # 5.0→0, 5.5→0.75
+    
+    # --- 2. Experience Component ---
+    internship_score = min(4, internships) * 2.5      # 0→0, 1→2.5, 2→5, 3→7.5, 4→10
+    project_score = min(5, projects) * 1.2            # 0→0, 1→1.2, 2→2.4, 3→3.6
+    
+    # --- 3. Technical Skills Component ---
+    # Weighted average of all four skills, scaled to LPA contribution
+    tech_avg = (coding_score * 0.30 + dsa_score * 0.35 + webdev_score * 0.20 + comm_score * 0.15)
+    if tech_avg >= 85:
+        skill_score = 8.0 + (tech_avg - 85) * 0.2    # Top tier: 8-11 LPA
+    elif tech_avg >= 70:
+        skill_score = 5.0 + (tech_avg - 70) * 0.2    # Mid-high: 5-8 LPA
+    elif tech_avg >= 50:
+        skill_score = 2.0 + (tech_avg - 50) * 0.15   # Mid: 2-5 LPA
+    else:
+        skill_score = max(0.0, tech_avg * 0.04)       # Low: 0-2 LPA
+    
+    # --- 4. Backlog Penalty (severe) ---
+    backlog_penalty = min(8.0, backlogs * 2.5)
+    
+    # --- 5. Composite Package ---
+    base = 3.0  # Minimum floor (service company base)
+    raw_package = base + cgpa_score + internship_score + project_score + skill_score - backlog_penalty
+    
+    # Apply probability as a confidence/leverage multiplier
+    # Use sqrt to soften the impact so mid-probability students aren't crushed
+    confidence = prob_placed ** 0.6
+    realized_package = raw_package * confidence
+    
+    # Hard floor and ceiling
+    realized_package = max(3.0, min(45.0, realized_package))
+    
+    # Generate asymmetric range (tighter at bottom, wider at top)
+    spread = 0.12 if realized_package < 8.0 else 0.15
+    low_bound = max(2.5, round(realized_package * (1.0 - spread), 1))
+    high_bound = min(45.0, round(realized_package * (1.0 + spread), 1))
+    
+    # --- 6. Tier Classification ---
+    if realized_package >= 18.0:
+        tier = "FAANG / Dream Company"
+    elif realized_package >= 12.0:
+        tier = "Product / Tier-1 Role"
+    elif realized_package >= 8.0:
+        tier = "Mid-Tier Product / Specialist"
+    elif realized_package >= 5.0:
+        tier = "Service MNC / System Engineer"
+    else:
+        tier = "Entry Level / Associate"
         
     return f"{low_bound:.1f} - {high_bound:.1f} LPA ({tier})"
 
@@ -260,7 +293,7 @@ def predict():
         
         # 4. Salary Projection estimation
         salary_range = calculate_projected_salary(
-            cgpa, internships, projects, backlogs, coding_score, dsa_score, comm_score, prob_placed
+            cgpa, internships, projects, backlogs, coding_score, dsa_score, comm_score, webdev_score, prob_placed
         )
         # Save prediction run details to database history log
         try:
