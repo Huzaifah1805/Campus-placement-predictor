@@ -478,6 +478,56 @@ function populateReportData(data, inputPayload) {
             recCont.appendChild(item);
         });
     }
+
+    // 10. Company Matches Cards
+    const compCont = document.getElementById('companies-container');
+    if (compCont) {
+        compCont.innerHTML = '';
+        if (data.matched_companies && data.matched_companies.length > 0) {
+            data.matched_companies.forEach(company => {
+                const card = document.createElement('div');
+                card.className = 'company-card';
+                card.style.setProperty('--card-accent-color', company.color);
+                
+                // Construct tags for focus areas
+                const focusHTML = company.focus.map(f => `<span class="focus-tag">${f}</span>`).join('');
+                
+                card.innerHTML = `
+                    <div class="company-header">
+                        <div class="company-logo">
+                            <i class="${company.icon}"></i>
+                        </div>
+                        <div class="company-info">
+                            <span class="company-name">${company.name}</span>
+                            <span class="company-tier">${company.tier}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="company-fit-score">
+                        <div class="company-fit-score-header">
+                            <span>Compatibility Match</span>
+                            <span class="company-fit-score-val">${company.fit_score}%</span>
+                        </div>
+                        <div class="company-fit-bar-bg">
+                            <div class="company-fit-bar-fill" style="width: ${company.fit_score}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="company-focus">
+                        ${focusHTML}
+                    </div>
+                    
+                    <div class="company-meta">
+                        <span class="company-package">${company.package}</span>
+                        <span class="company-fit-badge ${company.match_class}">${company.match_level}</span>
+                    </div>
+                `;
+                compCont.appendChild(card);
+            });
+        } else {
+            compCont.innerHTML = '<div class="no-scenarios">No suitable company matches found. Try improving your skill scores.</div>';
+        }
+    }
 }
 
 // ==========================================

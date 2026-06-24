@@ -189,6 +189,148 @@ def calculate_projected_salary(cgpa, internships, projects, backlogs, coding_sco
         
     return f"{low_bound:.1f} - {high_bound:.1f} LPA ({tier})"
 
+# ==========================================
+# COMPANY MATCHING ENGINE
+# ==========================================
+# Each company has: name, logo_icon (FontAwesome), tier, package range,
+# minimum requirements (cgpa, coding, dsa, webdev, comm), and focus areas.
+COMPANY_DATABASE = [
+    # --- FAANG / Dream Tier ---
+    {"name": "Google", "icon": "fa-brands fa-google", "tier": "Dream", "package": "30-45 LPA", "color": "#4285F4",
+     "min_cgpa": 8.0, "min_coding": 85, "min_dsa": 90, "min_webdev": 60, "min_comm": 70, "focus": ["DSA", "System Design", "Problem Solving"]},
+    {"name": "Microsoft", "icon": "fa-brands fa-microsoft", "tier": "Dream", "package": "28-44 LPA", "color": "#00A4EF",
+     "min_cgpa": 7.5, "min_coding": 80, "min_dsa": 85, "min_webdev": 65, "min_comm": 70, "focus": ["DSA", "Cloud", "System Design"]},
+    {"name": "Amazon", "icon": "fa-brands fa-amazon", "tier": "Dream", "package": "26-42 LPA", "color": "#FF9900",
+     "min_cgpa": 7.0, "min_coding": 80, "min_dsa": 85, "min_webdev": 60, "min_comm": 65, "focus": ["DSA", "Leadership Principles", "Scalability"]},
+    {"name": "Meta", "icon": "fa-brands fa-meta", "tier": "Dream", "package": "32-50 LPA", "color": "#0668E1",
+     "min_cgpa": 8.0, "min_coding": 85, "min_dsa": 90, "min_webdev": 70, "min_comm": 65, "focus": ["DSA", "ML", "Distributed Systems"]},
+    {"name": "Apple", "icon": "fa-brands fa-apple", "tier": "Dream", "package": "30-48 LPA", "color": "#A2AAAD",
+     "min_cgpa": 8.0, "min_coding": 85, "min_dsa": 85, "min_webdev": 70, "min_comm": 75, "focus": ["iOS/Swift", "System Design", "UX"]},
+    {"name": "Netflix", "icon": "fa-solid fa-film", "tier": "Dream", "package": "35-55 LPA", "color": "#E50914",
+     "min_cgpa": 8.5, "min_coding": 90, "min_dsa": 90, "min_webdev": 75, "min_comm": 70, "focus": ["Microservices", "Streaming", "Java"]},
+    # --- Product Tier-1 ---
+    {"name": "Flipkart", "icon": "fa-solid fa-cart-shopping", "tier": "Tier-1 Product", "package": "18-30 LPA", "color": "#F7D716",
+     "min_cgpa": 7.5, "min_coding": 75, "min_dsa": 80, "min_webdev": 60, "min_comm": 60, "focus": ["DSA", "Backend", "Scalability"]},
+    {"name": "Adobe", "icon": "fa-solid fa-wand-magic-sparkles", "tier": "Tier-1 Product", "package": "20-32 LPA", "color": "#FF0000",
+     "min_cgpa": 7.5, "min_coding": 80, "min_dsa": 80, "min_webdev": 70, "min_comm": 65, "focus": ["Frontend", "Creative Cloud", "AI/ML"]},
+    {"name": "Uber", "icon": "fa-brands fa-uber", "tier": "Tier-1 Product", "package": "22-35 LPA", "color": "#000000",
+     "min_cgpa": 7.0, "min_coding": 80, "min_dsa": 85, "min_webdev": 60, "min_comm": 60, "focus": ["DSA", "Maps", "Real-time Systems"]},
+    {"name": "Goldman Sachs", "icon": "fa-solid fa-building-columns", "tier": "Tier-1 Product", "package": "20-35 LPA", "color": "#7399C6",
+     "min_cgpa": 8.0, "min_coding": 75, "min_dsa": 80, "min_webdev": 50, "min_comm": 75, "focus": ["FinTech", "Java", "Risk Modeling"]},
+    {"name": "Salesforce", "icon": "fa-brands fa-salesforce", "tier": "Tier-1 Product", "package": "18-28 LPA", "color": "#00A1E0",
+     "min_cgpa": 7.5, "min_coding": 75, "min_dsa": 70, "min_webdev": 70, "min_comm": 70, "focus": ["CRM", "Cloud", "Apex"]},
+    {"name": "Oracle", "icon": "fa-solid fa-database", "tier": "Tier-1 Product", "package": "15-25 LPA", "color": "#F80000",
+     "min_cgpa": 7.0, "min_coding": 70, "min_dsa": 75, "min_webdev": 55, "min_comm": 65, "focus": ["Database", "Cloud Infra", "Java"]},
+    {"name": "Samsung R&D", "icon": "fa-solid fa-mobile-screen", "tier": "Tier-1 Product", "package": "16-24 LPA", "color": "#1428A0",
+     "min_cgpa": 7.5, "min_coding": 75, "min_dsa": 75, "min_webdev": 55, "min_comm": 60, "focus": ["Embedded", "Android", "C++"]},
+    {"name": "Intuit", "icon": "fa-solid fa-calculator", "tier": "Tier-1 Product", "package": "18-28 LPA", "color": "#365EBF",
+     "min_cgpa": 7.5, "min_coding": 75, "min_dsa": 75, "min_webdev": 65, "min_comm": 65, "focus": ["FinTech", "Full Stack", "AI"]},
+    # --- Mid-Tier Product ---
+    {"name": "Paytm", "icon": "fa-solid fa-wallet", "tier": "Mid-Tier Product", "package": "12-18 LPA", "color": "#00BAF2",
+     "min_cgpa": 6.5, "min_coding": 65, "min_dsa": 70, "min_webdev": 60, "min_comm": 55, "focus": ["Payments", "Backend", "Mobile"]},
+    {"name": "Zomato", "icon": "fa-solid fa-utensils", "tier": "Mid-Tier Product", "package": "14-22 LPA", "color": "#E23744",
+     "min_cgpa": 7.0, "min_coding": 70, "min_dsa": 75, "min_webdev": 60, "min_comm": 60, "focus": ["Full Stack", "ML", "Logistics"]},
+    {"name": "Swiggy", "icon": "fa-solid fa-truck-fast", "tier": "Mid-Tier Product", "package": "14-20 LPA", "color": "#FC8019",
+     "min_cgpa": 7.0, "min_coding": 70, "min_dsa": 70, "min_webdev": 60, "min_comm": 55, "focus": ["Logistics", "Backend", "ML"]},
+    {"name": "Razorpay", "icon": "fa-solid fa-credit-card", "tier": "Mid-Tier Product", "package": "15-25 LPA", "color": "#3395FF",
+     "min_cgpa": 7.0, "min_coding": 75, "min_dsa": 75, "min_webdev": 65, "min_comm": 60, "focus": ["Payments API", "Security", "Node.js"]},
+    {"name": "PhonePe", "icon": "fa-solid fa-money-bill-transfer", "tier": "Mid-Tier Product", "package": "14-22 LPA", "color": "#5F259F",
+     "min_cgpa": 7.0, "min_coding": 70, "min_dsa": 70, "min_webdev": 55, "min_comm": 60, "focus": ["Payments", "Java", "Microservices"]},
+    {"name": "Atlassian", "icon": "fa-brands fa-atlassian", "tier": "Mid-Tier Product", "package": "18-30 LPA", "color": "#0052CC",
+     "min_cgpa": 7.5, "min_coding": 80, "min_dsa": 80, "min_webdev": 65, "min_comm": 70, "focus": ["Collaboration", "Cloud", "React"]},
+    {"name": "Cred", "icon": "fa-solid fa-gem", "tier": "Mid-Tier Product", "package": "16-26 LPA", "color": "#2D2D2D",
+     "min_cgpa": 7.5, "min_coding": 75, "min_dsa": 75, "min_webdev": 70, "min_comm": 60, "focus": ["FinTech", "Design", "Backend"]},
+    # --- Service MNC ---
+    {"name": "TCS Digital", "icon": "fa-solid fa-t", "tier": "Service MNC", "package": "7-9 LPA", "color": "#0066B3",
+     "min_cgpa": 7.0, "min_coding": 55, "min_dsa": 50, "min_webdev": 45, "min_comm": 55, "focus": ["Java", "Cloud", "Agile"]},
+    {"name": "Infosys (Power Prog.)", "icon": "fa-solid fa-i", "tier": "Service MNC", "package": "6.5-9.5 LPA", "color": "#007CC3",
+     "min_cgpa": 7.0, "min_coding": 55, "min_dsa": 55, "min_webdev": 45, "min_comm": 55, "focus": ["Java", "Python", "Cloud"]},
+    {"name": "Wipro Elite", "icon": "fa-solid fa-w", "tier": "Service MNC", "package": "6-8 LPA", "color": "#44147A",
+     "min_cgpa": 6.5, "min_coding": 50, "min_dsa": 45, "min_webdev": 40, "min_comm": 50, "focus": ["Testing", "Java", "DevOps"]},
+    {"name": "Cognizant GenC", "icon": "fa-solid fa-c", "tier": "Service MNC", "package": "6-8.5 LPA", "color": "#1A4CA1",
+     "min_cgpa": 6.5, "min_coding": 50, "min_dsa": 45, "min_webdev": 45, "min_comm": 55, "focus": ["Digital", "Cloud", "AI"]},
+    {"name": "Capgemini", "icon": "fa-solid fa-c", "tier": "Service MNC", "package": "6-7.5 LPA", "color": "#0070AD",
+     "min_cgpa": 6.0, "min_coding": 45, "min_dsa": 40, "min_webdev": 40, "min_comm": 50, "focus": ["Consulting", "SAP", "Cloud"]},
+    {"name": "Accenture", "icon": "fa-solid fa-a", "tier": "Service MNC", "package": "4.5-7 LPA", "color": "#A100FF",
+     "min_cgpa": 6.0, "min_coding": 40, "min_dsa": 35, "min_webdev": 35, "min_comm": 50, "focus": ["Consulting", "Digital", "Cloud"]},
+    {"name": "Tech Mahindra", "icon": "fa-solid fa-m", "tier": "Service MNC", "package": "4-6.5 LPA", "color": "#CC0000",
+     "min_cgpa": 6.0, "min_coding": 40, "min_dsa": 35, "min_webdev": 35, "min_comm": 45, "focus": ["Telecom", "5G", "AI"]},
+    # --- Entry Level ---
+    {"name": "TCS Ninja", "icon": "fa-solid fa-t", "tier": "Entry Level", "package": "3.6-4 LPA", "color": "#0066B3",
+     "min_cgpa": 5.5, "min_coding": 30, "min_dsa": 25, "min_webdev": 25, "min_comm": 40, "focus": ["Support", "Testing", "Maintenance"]},
+    {"name": "Infosys (Regular)", "icon": "fa-solid fa-i", "tier": "Entry Level", "package": "3.6-4.5 LPA", "color": "#007CC3",
+     "min_cgpa": 5.5, "min_coding": 30, "min_dsa": 25, "min_webdev": 25, "min_comm": 40, "focus": ["Support", "BPO", "Testing"]},
+    {"name": "Wipro Turbo", "icon": "fa-solid fa-w", "tier": "Entry Level", "package": "3.5-4 LPA", "color": "#44147A",
+     "min_cgpa": 5.0, "min_coding": 25, "min_dsa": 20, "min_webdev": 20, "min_comm": 35, "focus": ["Support", "Testing", "Documentation"]},
+    {"name": "HCLTech", "icon": "fa-solid fa-h", "tier": "Entry Level", "package": "3.5-5 LPA", "color": "#006BA6",
+     "min_cgpa": 5.5, "min_coding": 35, "min_dsa": 30, "min_webdev": 30, "min_comm": 40, "focus": ["Infrastructure", "Support", "Cloud"]},
+    # --- Specialist / Startup ---
+    {"name": "Stripe", "icon": "fa-brands fa-stripe", "tier": "Specialist", "package": "25-40 LPA", "color": "#635BFF",
+     "min_cgpa": 8.0, "min_coding": 85, "min_dsa": 85, "min_webdev": 75, "min_comm": 65, "focus": ["Payments", "API Design", "Ruby/Go"]},
+    {"name": "Shopify", "icon": "fa-brands fa-shopify", "tier": "Specialist", "package": "20-35 LPA", "color": "#96BF48",
+     "min_cgpa": 7.5, "min_coding": 80, "min_dsa": 75, "min_webdev": 80, "min_comm": 65, "focus": ["E-commerce", "React", "Rails"]},
+    {"name": "Freshworks", "icon": "fa-solid fa-headset", "tier": "Mid-Tier Product", "package": "12-18 LPA", "color": "#2CA01C",
+     "min_cgpa": 7.0, "min_coding": 65, "min_dsa": 65, "min_webdev": 60, "min_comm": 60, "focus": ["SaaS", "Full Stack", "AI"]},
+    {"name": "Zoho", "icon": "fa-solid fa-z", "tier": "Mid-Tier Product", "package": "8-14 LPA", "color": "#D0342C",
+     "min_cgpa": 6.5, "min_coding": 60, "min_dsa": 60, "min_webdev": 55, "min_comm": 55, "focus": ["SaaS", "Java", "Full Stack"]},
+    {"name": "MakeMyTrip", "icon": "fa-solid fa-plane", "tier": "Mid-Tier Product", "package": "10-16 LPA", "color": "#EE2E24",
+     "min_cgpa": 7.0, "min_coding": 65, "min_dsa": 65, "min_webdev": 55, "min_comm": 55, "focus": ["Travel Tech", "Backend", "ML"]},
+    {"name": "Myntra", "icon": "fa-solid fa-shirt", "tier": "Mid-Tier Product", "package": "14-22 LPA", "color": "#FF3F6C",
+     "min_cgpa": 7.0, "min_coding": 70, "min_dsa": 70, "min_webdev": 65, "min_comm": 55, "focus": ["E-commerce", "ML", "React"]},
+    {"name": "Jio Platforms", "icon": "fa-solid fa-tower-cell", "tier": "Mid-Tier Product", "package": "10-16 LPA", "color": "#0A3A7D",
+     "min_cgpa": 7.0, "min_coding": 65, "min_dsa": 60, "min_webdev": 55, "min_comm": 55, "focus": ["5G", "IoT", "Cloud"]},
+]
+
+def match_companies(cgpa, coding_score, dsa_score, webdev_score, comm_score, prob_placed):
+    """Matches student profile against company requirements and returns ranked list."""
+    matched = []
+    
+    for company in COMPANY_DATABASE:
+        # Calculate fit score (0-100) for each requirement dimension
+        cgpa_fit = min(100, (cgpa / company['min_cgpa']) * 100) if company['min_cgpa'] > 0 else 100
+        coding_fit = min(100, (coding_score / company['min_coding']) * 100) if company['min_coding'] > 0 else 100
+        dsa_fit = min(100, (dsa_score / company['min_dsa']) * 100) if company['min_dsa'] > 0 else 100
+        webdev_fit = min(100, (webdev_score / company['min_webdev']) * 100) if company['min_webdev'] > 0 else 100
+        comm_fit = min(100, (comm_score / company['min_comm']) * 100) if company['min_comm'] > 0 else 100
+        
+        # Weighted overall fit
+        overall_fit = (cgpa_fit * 0.20 + coding_fit * 0.25 + dsa_fit * 0.25 + webdev_fit * 0.15 + comm_fit * 0.15)
+        
+        # Check if student meets minimum thresholds (allow 85% of minimum)
+        meets_cgpa = cgpa >= company['min_cgpa'] * 0.85
+        meets_coding = coding_score >= company['min_coding'] * 0.80
+        meets_dsa = dsa_score >= company['min_dsa'] * 0.80
+        
+        # Classify match strength
+        if overall_fit >= 95 and meets_cgpa and meets_coding and meets_dsa:
+            match_level = "Strong Match"
+            match_class = "success"
+        elif overall_fit >= 80 and meets_cgpa:
+            match_level = "Good Fit"
+            match_class = "warning"
+        elif overall_fit >= 65:
+            match_level = "Stretch Target"
+            match_class = "info"
+        else:
+            continue  # Skip companies that are too far out of reach
+        
+        matched.append({
+            'name': company['name'],
+            'icon': company['icon'],
+            'tier': company['tier'],
+            'package': company['package'],
+            'color': company['color'],
+            'focus': company['focus'],
+            'fit_score': round(overall_fit, 1),
+            'match_level': match_level,
+            'match_class': match_class
+        })
+    
+    # Sort by fit score descending
+    matched.sort(key=lambda x: x['fit_score'], reverse=True)
+    
+    return matched
+
 @app.route('/api/predict', methods=['POST'])
 def predict():
     """
@@ -310,6 +452,9 @@ def predict():
         except Exception as db_err:
             print(f"Failed to log prediction to database: {db_err}")
 
+        # 5. Company Matching
+        matched_companies = match_companies(cgpa, coding_score, dsa_score, webdev_score, comm_score, prob_placed)
+
         return jsonify({
             'status': 'success',
             'placement_probability': float(prob_placed),
@@ -318,7 +463,8 @@ def predict():
             'feedback': mentor_data['feedback'],
             'recommendations': mentor_data['recommendations'],
             'roadmap': mentor_data['roadmap'],
-            'project_ideas': mentor_data['project_ideas']
+            'project_ideas': mentor_data['project_ideas'],
+            'matched_companies': matched_companies
         })
         
     except Exception as e:
