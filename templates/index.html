@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Predict your campus placement readiness and get custom AI mentoring, roadmaps, and project ideas.">
+    <title>PlacementPulse | AI Placement Predictor & Mentor</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <i class="fa-solid fa-graduation-cap brand-icon"></i>
+                <span class="brand-text">Placement<span>Pulse</span></span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="overview" id="nav-overview">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard Home</span>
+                </a>
+                <a href="#" class="nav-item" data-section="predictor" id="nav-predictor">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Placement Predictor</span>
+                </a>
+                <a href="#" class="nav-item disabled" data-section="analysis" id="nav-analysis" title="Run prediction first">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Readiness Analysis</span>
+                </a>
+                <a href="#" class="nav-item disabled" data-section="mentor" id="nav-mentor" title="Run prediction first">
+                    <i class="fa-solid fa-user-tie"></i>
+                    <span>AI Placement Mentor</span>
+                </a>
+                <a href="#" class="nav-item" data-section="mock-test" id="nav-mock-test">
+                    <i class="fa-solid fa-laptop-code"></i>
+                    <span>Mock Skill Quiz</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="system-status">
+                    <span class="status-dot green"></span>
+                    <span class="status-text">ML Model: Online</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-welcome">
+                    <h1 id="header-title">Welcome to PlacementPulse</h1>
+                    <p class="header-subtitle" id="header-subtitle">Evaluate your placement readiness and design your career path.</p>
+                </div>
+                <div class="header-actions">
+                    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle Dark/Light Mode">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                    <div class="user-profile">
+                        <div class="avatar">S</div>
+                        <span class="username">Student Guest</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Notification Toast -->
+            <div id="toast" class="toast hidden"></div>
+
+            <!-- Content Screens -->
+            <div class="content-screens">
+                
+                <!-- SECTION 1: OVERVIEW -->
+                <section id="section-overview" class="screen-section active">
+                    <div class="hero-card">
+                        <div class="hero-text">
+                            <h2>Know Your Placement Worth Before the Drive Starts</h2>
+                            <p>Stop guessing your placement readiness. Our trained Random Forest Classifier analyzes your CGPA, internships, projects, and tech skills to predict your placement probability and provide tailored roadmaps.</p>
+                            <button class="btn btn-primary btn-lg" onclick="switchSection('predictor')">
+                                Launch Predictor <i class="fa-solid fa-arrow-right icon-right"></i>
+                            </button>
+                        </div>
+                        <div class="hero-visual">
+                            <i class="fa-solid fa-brain brain-glow"></i>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon purple"><i class="fa-solid fa-percent"></i></div>
+                            <div class="stat-info">
+                                <h3 id="stat-accuracy">89.6%</h3>
+                                <p>Model Accuracy</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon blue"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                            <div class="stat-info">
+                                <h3 id="stat-avg-package">12.0 LPA</h3>
+                                <p>Avg. Product Package</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
+                            <div class="stat-info">
+                                <h3 id="stat-records">2,500</h3>
+                                <p>Baseline Data Points</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-layout">
+                        <div class="info-card flex-2">
+                            <h3>How it Works</h3>
+                            <div class="steps-timeline">
+                                <div class="timeline-step">
+                                    <div class="step-num">1</div>
+                                    <div class="step-content">
+                                        <h4>Input Metrics</h4>
+                                        <p>Provide your CGPA, backlogs, skills proficiency, and project details.</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-step">
+                                    <div class="step-num">2</div>
+                                    <div class="step-content">
+                                        <h4>AI Predictions</h4>
+                                        <p>The Random Forest Classifier calculates your placement percentage and projected salary range.</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-step">
+                                    <div class="step-num">3</div>
+                                    <div class="step-content">
+                                        <h4>What-If Simulations</h4>
+                                        <p>See exactly how clearing backlogs or scoring better in DSA impacts your chances in real-time.</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-step">
+                                    <div class="step-num">4</div>
+                                    <div class="step-content">
+                                        <h4>Custom Mentoring</h4>
+                                        <p>Get customized study roadmaps, recommended projects, and resource recommendations.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card flex-1 quiz-invite">
+                            <i class="fa-solid fa-award quiz-badge-icon"></i>
+                            <h3>Not sure about your coding/DSA scores?</h3>
+                            <p>Take our quick interactive Mock Skill Quiz to gauge your skills and automatically pre-fill the predictor form!</p>
+                            <button class="btn btn-secondary btn-full" onclick="switchSection('mock-test')">Take Quick Quiz</button>
+                        </div>
+                    </div>
+
+                    <!-- SQLite Database Log -->
+                    <div class="glass-card margin-top-lg" id="history-container-box">
+                        <div class="card-header">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                            <h2>Recent Diagnoses (SQLite Database History)</h2>
+                        </div>
+                        <div class="table-container" style="overflow-x: auto; margin-top: 10px;">
+                            <table class="history-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid var(--border-glass);">
+                                        <th style="padding: 12px 16px; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">Timestamp</th>
+                                        <th style="padding: 12px 16px; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">CGPA</th>
+                                        <th style="padding: 12px 16px; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">Backlogs</th>
+                                        <th style="padding: 12px 16px; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">Technical (Avg)</th>
+                                        <th style="padding: 12px 16px; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">Probability</th>
+                                        <th style="padding: 12px 16px; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">Projected Package</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-table-body">
+                                    <tr>
+                                        <td colspan="6" style="padding: 20px 16px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">No diagnoses run yet. Run predictor to populate database.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2: PREDICTOR FORM -->
+                <section id="section-predictor" class="screen-section">
+                    <div class="grid-2-col">
+                        <!-- Form Card -->
+                        <div class="glass-card">
+                            <div class="card-header">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                                <h2>Enter Student Profile Details</h2>
+                            </div>
+                            <form id="prediction-form" class="form-grid">
+                                <div class="form-group">
+                                    <label for="input-cgpa">Cumulative CGPA</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="input-cgpa" name="cgpa" min="5.0" max="10.0" step="0.1" value="7.5">
+                                        <span class="slider-value" id="val-cgpa">7.5</span>
+                                    </div>
+                                    <span class="field-help">Your current overall CGPA.</span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="input-backlogs">Active Backlogs</label>
+                                    <input type="number" id="input-backlogs" name="backlogs" min="0" max="10" value="0" class="input-field">
+                                    <span class="field-help">Number of uncleared academic papers.</span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="input-internships">Internships Completed</label>
+                                    <input type="number" id="input-internships" name="internships" min="0" max="5" value="0" class="input-field">
+                                    <span class="field-help">Count of professional internships.</span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="input-projects">Academic/Personal Projects</label>
+                                    <input type="number" id="input-projects" name="projects" min="0" max="10" value="1" class="input-field">
+                                    <span class="field-help">Count of major projects on your resume.</span>
+                                </div>
+
+                                <div class="form-divider">Skill Profiles (0 to 100)</div>
+
+                                <div class="form-group">
+                                    <label for="input-coding">General Coding Proficiency</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="input-coding" name="coding_score" min="10" max="100" step="5" value="60">
+                                        <span class="slider-value" id="val-coding">60</span>
+                                    </div>
+                                    <span class="field-help">Familiarity with loops, OOPs, basic structures.</span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="input-dsa">Data Structures & Algorithms (DSA)</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="input-dsa" name="dsa_score" min="10" max="100" step="5" value="50">
+                                        <span class="slider-value" id="val-dsa">50</span>
+                                    </div>
+                                    <span class="field-help">Efficiency in sorting, trees, dynamic programming.</span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="input-webdev">Development Specialization</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="input-webdev" name="webdev_score" min="10" max="100" step="5" value="55">
+                                        <span class="slider-value" id="val-webdev">55</span>
+                                    </div>
+                                    <span class="field-help">Web, Android, Cloud, or ML development.</span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="input-comm">Communication & Soft Skills</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="input-comm" name="comm_score" min="10" max="100" step="5" value="65">
+                                        <span class="slider-value" id="val-comm">65</span>
+                                    </div>
+                                    <span class="field-help">Interview expression, HR readiness.</span>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary btn-lg btn-full" id="btn-submit-prediction">
+                                        <span id="btn-text">Predict Placement Probability</span>
+                                        <span id="btn-spinner" class="spinner hidden"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Sidebar Tips -->
+                        <div class="helper-column">
+                            <div class="glass-card info-tip">
+                                <h3><i class="fa-solid fa-circle-info"></i> How We Evaluate</h3>
+                                <p>Our algorithm uses historical trends of placed seniors. The ML model evaluates feature weights, with <strong>CGPA</strong> and <strong>DSA Proficiency</strong> acting as major filters for tier-1 companies, while active backlogs act as severe blockers.</p>
+                            </div>
+                            
+                            <div class="glass-card quiz-promo">
+                                <h3><i class="fa-solid fa-puzzle-piece"></i> Dynamic Quiz Alternative</h3>
+                                <p>If you don't know your scores, take our mock test. It grades your answers instantly and translates them into coding, DSA, and soft skill values, filling the form automatically.</p>
+                                <button class="btn btn-outline btn-sm" onclick="switchSection('mock-test')">Solve Mock Quiz</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3: READINESS ANALYSIS -->
+                <section id="section-analysis" class="screen-section">
+                    <div class="grid-2-col">
+                        <!-- Left: Probability & What-if -->
+                        <div class="flex-column-gap">
+                            <!-- Score Card -->
+                            <div class="glass-card probability-card">
+                                <div class="probability-circle-container">
+                                    <svg class="progress-ring" width="220" height="220">
+                                        <circle class="progress-ring__circle-bg" stroke="rgba(255, 255, 255, 0.08)" stroke-width="14" fill="transparent" r="90" cx="110" cy="110"/>
+                                        <circle id="probability-gauge" class="progress-ring__circle" stroke="url(#gradient-success)" stroke-width="14" stroke-linecap="round" fill="transparent" r="90" cx="110" cy="110"/>
+                                        <!-- SVG Gradients -->
+                                        <defs>
+                                            <linearGradient id="gradient-success" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" stop-color="#8b5cf6" />
+                                                <stop offset="100%" stop-color="#10b981" />
+                                            </linearGradient>
+                                        </defs>
+                                    </svg>
+                                    <div class="probability-percent" id="display-prob">0%</div>
+                                </div>
+                                <div class="probability-label">
+                                    <h3>Placement Readiness Score</h3>
+                                    <p id="display-readiness-text">Calculation pending...</p>
+                                </div>
+                                <div class="salary-container">
+                                    <span class="salary-label">Projected Package:</span>
+                                    <span class="salary-value" id="display-salary">Calculating...</span>
+                                </div>
+                            </div>
+
+                            <!-- What-If Analysis -->
+                            <div class="glass-card">
+                                <div class="card-header">
+                                    <i class="fa-solid fa-code-fork"></i>
+                                    <h2>What-If Scenarios (Counterfactuals)</h2>
+                                </div>
+                                <p class="card-desc">Simulated impacts on your score if you take these actions:</p>
+                                <div class="scenarios-list" id="scenarios-container">
+                                    <!-- Scenarios populated dynamically -->
+                                    <div class="no-scenarios">No simulations run. Perform prediction first.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Charts & Metrics Breakdown -->
+                        <div class="flex-column-gap">
+                            <!-- Radar Chart -->
+                            <div class="glass-card chart-card">
+                                <div class="card-header">
+                                    <i class="fa-solid fa-chart-bar"></i>
+                                    <h2>Skill Gap Analysis</h2>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="skillRadarChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Metrics Status -->
+                            <div class="glass-card">
+                                <div class="card-header">
+                                    <i class="fa-solid fa-list-check"></i>
+                                    <h2>Profile Health Check</h2>
+                                </div>
+                                <div class="metrics-grid" id="metrics-status-container">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 4: AI MENTOR & ROADMAP -->
+                <section id="section-mentor" class="screen-section">
+                    <div class="mentor-layout">
+                        <!-- Left: Roadmap & Projects -->
+                        <div class="mentor-main">
+                            <div class="glass-card">
+                                <div class="card-header">
+                                    <i class="fa-solid fa-road"></i>
+                                    <h2>Your Custom Placement Roadmap</h2>
+                                </div>
+                                <div class="roadmap-timeline" id="roadmap-timeline-container">
+                                    <!-- Roadmaps populated dynamically -->
+                                </div>
+                            </div>
+
+                            <div class="glass-card margin-top-lg">
+                                <div class="card-header">
+                                    <i class="fa-solid fa-laptop-code"></i>
+                                    <h2>Recommended Projects</h2>
+                                </div>
+                                <div class="projects-list-grid" id="project-ideas-container">
+                                    <!-- Project ideas populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Action recommendations & Booking -->
+                        <div class="mentor-side">
+                            <div class="glass-card recomendations-card">
+                                <div class="card-header">
+                                    <i class="fa-solid fa-lightbulb"></i>
+                                    <h2>High-Priority Steps</h2>
+                                </div>
+                                <ul class="recommendation-list" id="recommendations-container">
+                                    <!-- Populated dynamically -->
+                                </ul>
+                            </div>
+
+                            <div class="glass-card margin-top-lg">
+                                <div class="card-header">
+                                    <i class="fa-solid fa-calendar-days"></i>
+                                    <h2>1-on-1 Mentor Session</h2>
+                                </div>
+                                <p class="card-desc">Need a mock interview or resume review? Schedule a session with our placement mentors.</p>
+                                <form id="booking-form" class="booking-form-grid">
+                                    <div class="form-group-compact">
+                                        <label for="booking-name">Full Name</label>
+                                        <input type="text" id="booking-name" required placeholder="John Doe" class="input-field-compact">
+                                    </div>
+                                    <div class="form-group-compact">
+                                        <label for="booking-email">Email Address</label>
+                                        <input type="email" id="booking-email" required placeholder="john@university.edu" class="input-field-compact">
+                                    </div>
+                                    <div class="form-group-compact">
+                                        <label for="booking-topic">Session Topic</label>
+                                        <select id="booking-topic" class="input-field-compact">
+                                            <option value="Resume Review">Resume Review & Overhaul</option>
+                                            <option value="DSA Mock Interview">DSA Technical Mock Interview</option>
+                                            <option value="System Design Review">System Design Fundamentals</option>
+                                            <option value="HR & Communication Prep">HR & Behavioral Mock Prep</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-secondary btn-full margin-top-sm" id="btn-submit-booking">
+                                        Book Mentor Session
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 5: MOCK SKILL QUIZ -->
+                <section id="section-mock-test" class="screen-section">
+                    <div class="quiz-container-box glass-card">
+                        <!-- Quiz Start -->
+                        <div id="quiz-start-view" class="quiz-view">
+                            <i class="fa-solid fa-circle-question quiz-intro-icon"></i>
+                            <h2>Quick Skill Assessment Quiz</h2>
+                            <p>Not sure where your Coding, DSA, and Communication levels stand? Answer these 5 quick multiple-choice questions curated from coding assessments and interviews. Your performance will calculate your baseline score and pre-fill the placement predictor form.</p>
+                            <div class="quiz-details">
+                                <div><i class="fa-solid fa-clock"></i> 5 Questions</div>
+                                <div><i class="fa-solid fa-chart-simple"></i> Grades coding, DSA, soft skills</div>
+                            </div>
+                            <button class="btn btn-primary btn-lg" onclick="startQuiz()">Start Assessment</button>
+                        </div>
+
+                        <!-- Quiz Questions -->
+                        <div id="quiz-question-view" class="quiz-view hidden">
+                            <div class="quiz-progress-bar">
+                                <div class="quiz-progress-fill" id="quiz-progress"></div>
+                            </div>
+                            <div class="quiz-header-info">
+                                <span class="q-number" id="q-counter">Question 1 of 5</span>
+                                <span class="q-tag" id="q-category">DSA</span>
+                            </div>
+                            <h3 class="quiz-question-text" id="q-text">What is the time complexity of searching in a balanced Binary Search Tree?</h3>
+                            <div class="quiz-options" id="q-options">
+                                <!-- Option buttons will be generated by JS -->
+                            </div>
+                            <div class="quiz-nav-actions">
+                                <button class="btn btn-outline btn-sm" id="btn-quiz-prev" onclick="prevQuestion()" disabled>Previous</button>
+                                <button class="btn btn-primary btn-sm" id="btn-quiz-next" onclick="nextQuestion()">Next</button>
+                            </div>
+                        </div>
+
+                        <!-- Quiz Completed -->
+                        <div id="quiz-results-view" class="quiz-view hidden">
+                            <i class="fa-solid fa-square-poll-vertical quiz-success-icon"></i>
+                            <h2>Assessment Complete!</h2>
+                            <p>Here is your estimated score breakdown based on your answers:</p>
+                            
+                            <div class="quiz-scores-grid">
+                                <div class="quiz-score-item">
+                                    <span class="score-label">Coding Score:</span>
+                                    <span class="score-val" id="quiz-res-coding">0/100</span>
+                                </div>
+                                <div class="quiz-score-item">
+                                    <span class="score-label">DSA Score:</span>
+                                    <span class="score-val" id="quiz-res-dsa">0/100</span>
+                                </div>
+                                <div class="quiz-score-item">
+                                    <span class="score-label">Communication Score:</span>
+                                    <span class="score-val" id="quiz-res-comm">0/100</span>
+                                </div>
+                            </div>
+
+                            <p class="quiz-apply-info">You can now automatically pre-fill these scores in the Predictor Form to evaluate your placement readiness!</p>
+                            
+                            <div class="quiz-results-actions">
+                                <button class="btn btn-primary" onclick="applyQuizScores()">Pre-fill Form & Run Prediction</button>
+                                <button class="btn btn-outline" onclick="resetQuiz()">Retake Quiz</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
