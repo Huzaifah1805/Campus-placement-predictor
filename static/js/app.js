@@ -343,11 +343,6 @@ function populateReportData(data, inputPayload) {
         }
     }
 
-    // 3. Projected Package
-    const salaryEl = document.getElementById('display-salary');
-    if (salaryEl) {
-        salaryEl.textContent = data.projected_salary;
-    }
 
     // 4. What-If Scenarios
     const scenarioCont = document.getElementById('scenarios-container');
@@ -518,7 +513,6 @@ function populateReportData(data, inputPayload) {
                     </div>
                     
                     <div class="company-meta">
-                        <span class="company-package">${company.package}</span>
                         <span class="company-fit-badge ${company.match_class}">${company.match_level}</span>
                     </div>
                 `;
@@ -938,7 +932,6 @@ async function fetchPredictionHistory() {
                     <td style="padding: 12px 16px; font-size: 0.88rem;"><span class="badge ${row.backlogs > 0 ? 'danger' : 'success'}" style="font-size:0.65rem; padding: 2px 6px;">${row.backlogs}</span></td>
                     <td style="padding: 12px 16px; font-size: 0.88rem;">${techAvg}%</td>
                     <td style="padding: 12px 16px; font-size: 0.88rem; font-weight: 700; color: ${probPercent > 80 ? 'var(--success)' : (probPercent > 50 ? 'var(--warning)' : 'var(--danger)')}">${probPercent}%</td>
-                    <td style="padding: 12px 16px; font-size: 0.85rem; color: var(--secondary); font-weight: 600;">${row.salary_range}</td>
                 `;
                 tbody.appendChild(tr);
             });
