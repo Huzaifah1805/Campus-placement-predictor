@@ -13,7 +13,12 @@ app = Flask(__name__,
 # Base path configuration
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, 'placement_model.pkl')
-DB_PATH = os.path.join(BASE_DIR, 'placements.db')
+
+# Vercel serverless has a read-only filesystem, except for /tmp
+if os.environ.get('VERCEL'):
+    DB_PATH = '/tmp/placements.db'
+else:
+    DB_PATH = os.path.join(BASE_DIR, 'placements.db')
 
 def init_db():
     try:

@@ -9,11 +9,9 @@ venv/
 ENV/
 env/
 
-# Databases & Large Binaries
+# Databases (SQLite write history is ephemeral on Vercel, keep local db ignored)
 *.db
 *.sqlite
-*.pkl
-*.csv
 
 # OS files
 .DS_Store
